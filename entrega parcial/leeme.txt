@@ -1,0 +1,42 @@
+Práctica realizada por: José Antonio Álvarez Ocete
+
+Práctica 1.
+
+He incluido los siguientes métodos adicionales en MallaInd:
+void MallaInd::visualizarDE_MI_Vertex( ContextoVis & cv );
+void MallaInd::visualizarDE_MI_DrawArrays( ContextoVis & cv );
+void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv );
+
+Para realizar el dibujado de forma directa de todas las formas vistas en clase.
+Adicionalmente he implementado los VBOs y los colores (tanto para VBO como para
+modo directo).
+También he añadido el siguiente método, se explica su utilidad en la práctica 3:
+void MallaInd::fijarColorNodo(const Tupla3f &color);
+Para el color se realiza por defecto un degradado, teniendo todos los objetos
+que no utilicen el metodo fijarColorNodo el mismo coloreado.
+
+He implementado el uso de shaders utilizando los archivos proporcionados.
+
+Práctica 2.
+
+Nada adicional implementado. Funciona correctamente el cierre de mallas, asi
+como las tapas.
+
+Práctica 3.
+
+He creado dos objetos distintos para esta práctica: una atracción de feria y
+una araña. Tras completar el primero quería implementar la funcionalidad del
+coloreado fijo a través de fijarColorNodo, para que se viese mejor utilicé
+otro objeto distinto.
+
+La atracción tiene 3 grados de libertad por brazo, uno en la base de brazos
+(donde se unen) y dos adicionales en el cilindro que la sujeta, haciendo un
+total de 15.
+
+La araña tiene el mismo número de grados de libertad por pata y en el cuerpo
+ya que esencialmente los modelos son muy parecidos. Al tener 4 patas más el
+número de parámetros sube a 27.
+
+Para el coloreado de la araña he añadido el método fijarColorNodo a Objeto3D y
+a NodoGrafoEscena. Este asigna un color al objeto y a sus subobjetos de forma
+recursiva, parando cuando algún objeto ya tiene color de antemano.

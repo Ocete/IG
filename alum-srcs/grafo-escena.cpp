@@ -102,19 +102,19 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
 }
 // -----------------------------------------------------------------------------
 NodoGrafoEscena::NodoGrafoEscena() {
-   // COMPLETAR: práctica 3: inicializar un nodo vacío (sin entradas)
-   // ........
-
+  color_fijado = false;
 }
 // -----------------------------------------------------------------------------
-
-void NodoGrafoEscena::fijarColorNodo( const Tupla3f & nuevo_color )
-{
-   // COMPLETAR: práctica 3: asignarle un color plano al nodo, distinto del padre
-   // ........
-
+void NodoGrafoEscena::fijarColorNodo( const Tupla3f & nuevo_color ) {
+  if (!color_fijado) {
+    color_fijado = true;
+    for (int i=0; i<entradas.size(); i++) {
+      if (entradas[i].tipo == TipoEntNGE::objeto) {
+        entradas[i].objeto->fijarColorNodo( nuevo_color );
+      }
+    }
+  }
 }
-
 // -----------------------------------------------------------------------------
 // Añadir una entrada (al final).
 // genérica
@@ -213,9 +213,16 @@ void NodoGrafoEscenaParam::reset() {
 }
 // -----------------------------------------------------------------------------
 
-C::C() {
+C::C(bool atraccion) {
   cout << "Constructor C comienza" << endl;
-  agregar( new Atraccion( &parametros ) );
+  if (atraccion) {
+    agregar( new Atraccion( &parametros ) );
+    nombre = "Atracción";
+  } else {
+    agregar( new Colgante( &parametros ) );
+    reset();
+    nombre = "Araña";
+  }
   cout << "Constructor C termina" << endl;
 }
 
@@ -311,7 +318,7 @@ BrazoMecanico::BrazoMecanico(vector<Parametro> *v, float d, int num) {
 
 BaseBrazos::BaseBrazos(vector<Parametro> *v) {
   cout << "Constructor BaseBrazos comienza" << endl;
-  agregar ( MAT_Rotacion(0,0,1,0) );
+  agregar ( MAT_Rotacion(0,0,1,0) ); // MAT parametro
   for (int i=0; i<4; i++) {
     agregar( new BrazoMecanico(v, 1, i+1) );
     agregar( MAT_Rotacion(90,0,1,0) );
@@ -353,7 +360,98 @@ Atraccion::Atraccion(vector<Parametro> *v) {
                 true, 0, 45, 0.1) );
 
   cout << "Constructor BaseBrazos termina" << endl;
+}
+// -----------------------------------------------------------------------------
 
+Ojo::Ojo(float ang) {
+  cout << "Constructor Ojo comienza" << endl;
+  agregar( MAT_Rotacion(ang, 0, 1, 0) );
+  agregar( MAT_Rotacion(30, 0, 0, 1) );
+  agregar( MAT_Traslacion(1, 0, 0) );
+  agregar( new Esfera(20,50,false,false,0.1) );
+  Tupla3f c = {1,0,0};
+  fijarColorNodo( c );
+  cout << "Constructor Ojo termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+Pata::Pata(vector<Parametro> *v, int num) {
+  cout << "Constructor Pata comienza" << endl;
+  float e = 0.05;
+  agregar( MAT_Traslacion(1-e, 0 ,0) );
+  agregar( MAT_Escalado(e, e, e) );
+  agregar( new BrazoMecanico(v, 1, num) );
+  Tupla3f c = {0.2,0.2,0.2};
+  fijarColorNodo( c );
+  cout << "Constructor Pata termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+ParDePatas::ParDePatas(vector<Parametro> *v, int num) {
+  cout << "Constructor ParDePatas comienza" << endl;
+  agregar( new Pata(v, num) );
+  agregar( MAT_Rotacion(180, 0, 0, 1) );
+  agregar( new Pata(v, num+1) );
+  cout << "Constructor ParDePatas termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+Cuerpo::Cuerpo(vector<Parametro> *v) {
+  cout << "Constructor Cuerpo comienza" << endl;
+  agregar( MAT_Rotacion(0,0,1,0) ); // MAT parametro
+  for (int i=0; i<4; i++) {
+    agregar( MAT_Rotacion(30, 0, 1, 0) );
+    agregar( new ParDePatas(v, i*2) );
+  }
+  agregar( MAT_Rotacion(45, 0, 1, 0) );
+  agregar( MAT_Escalado(1, 0.3, 1) );
+  agregar( new Ojo(15) );
+  agregar( new Ojo(-15) );
+  agregar( new Esfera(20,50,false,false,1) );
+
+  Tupla3f c = {0,0,0};
+  fijarColorNodo( c );
+  // Parámetro asociado
+  v->push_back( Parametro ("Giro del cuerpo de la araña",
+                entradas[0].matriz,
+                [=](float ang) {return MAT_Rotacion (ang,0,1,0);},
+                false, 180, 50, 2) );
+
+  cout << "Constructor Cuerpo termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+Colgante::Colgante(vector<Parametro> *v) {
+  cout << "Constructor Colgante comienza" << endl;
+  //agregar( MAT_Escalado(0.1,0.1,0.1) );
+  agregar( MAT_Traslacion(0,25.8 + 0.3,0) );
+  agregar( MAT_Rotacion(0,0,1,0) ); // MAT del parametro
+  agregar( MAT_Rotacion(0,1,0,0) ); // MAT del parametro
+  agregar( new Esfera(20,50,false,false,0.8) );
+  agregar( MAT_Traslacion(0,-25.8,0) );
+  agregar( new Cilindro(10, 30, true, true, 25, 0.01) );
+  agregar( MAT_Traslacion(0,-0.3,0) );
+  agregar( new Cuerpo(v) );
+
+  // Parámetro asociado
+  v->push_back( Parametro ("Giro colgante",
+                entradas[1].matriz,
+                [=](float ang) {return MAT_Rotacion (ang,0,1,0);},
+                false, 0, 10, 0.1) );
+
+  v->push_back( Parametro ("Giro colgante sobre si misma",
+                entradas[2].matriz,
+                [=](float ang) {return MAT_Rotacion (ang,1,0,0);},
+                true, 0, 5, 0.1) );
+
+  Tupla3f c = {1,1,1};
+  fijarColorNodo( c );
+
+  cout << "Constructor Colgante termina" << endl;
 }
 
 // -----------------------------------------------------------------------------

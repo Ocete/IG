@@ -22,7 +22,7 @@ units_alu := main cauce\
 ## ---------------------------------------------------------------------
 ## aspectos configurables
 
-opt_dbg_flag   := -g             # seleccionar depuración (-g) u optimización (-O3)
+opt_dbg_flag   := -g						 # seleccionar depuración (-g) u optimización (-O3)
 exit_first     := -Wfatal-errors # sirve para abortar después de primer error
 warn_all       := -Wall          # sirve para ver todos los warnings
 compatibilidad := -std=c++11     # versión del estandar C++ admitida

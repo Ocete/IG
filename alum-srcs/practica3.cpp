@@ -13,7 +13,10 @@
 
 using namespace std ;
 
-static NodoGrafoEscenaParam * objeto_activo = nullptr;
+static constexpr int numObjetos3 = 2;
+static NodoGrafoEscenaParam * objetos3[numObjetos3] = {nullptr, nullptr};
+static unsigned objetoActivo3 = 0 ;
+
 bool animacion_activada = false;
 int param_actual = 0;
 
@@ -24,8 +27,12 @@ int param_actual = 0;
 
 void P3_Inicializar(  )
 {
-   cout << "Creando objetos de la práctica 3 .... " << flush ;
-   objeto_activo = new C();
+   cout << "Creando objetos de la práctica 3 .... " << flush;
+   //vector<Parametro> *p;
+  //Atraccion atr (p);
+
+   objetos3[0] = new C(true);
+   objetos3[1] = new C(false);
    cout << "hecho." << endl << flush ;
 }
 
@@ -42,7 +49,14 @@ bool P3_FGE_PulsarTeclaCaracter( unsigned char tecla ) {
   bool res = false  ; // valor devuelto (true si se ha procesado tecla)
   switch ( toupper( tecla ) ) {
     case 'O' :
-       //activa el siguiente objeto de la práctica - no hay
+       objetoActivo3 = (objetoActivo3 + 1) % numObjetos3;
+       param_actual = 0;
+       cout << "nuevo objeto activo es: " << objetoActivo3 ;
+       if ( objetos3[objetoActivo3] != nullptr )
+          cout << " (" << objetos3[objetoActivo3]->leerNombre() << ")." << endl ;
+       else
+          cout << " (objeto no creado)" << endl ;
+       res = true;
        break ;
 
     case 'A' :
@@ -56,31 +70,31 @@ bool P3_FGE_PulsarTeclaCaracter( unsigned char tecla ) {
        break ;
 
     case 'G' :
-       param_actual = (param_actual + 1 ) % objeto_activo->numParametros();
+       param_actual = (param_actual + 1 ) % objetos3[objetoActivo3]->numParametros();
        cout << "Parámetro actual: " <<
-            ( objeto_activo->leerPtrParametro(param_actual) )->leer_descripcion() << endl;
+            ( objetos3[objetoActivo3]->leerPtrParametro(param_actual) )->leer_descripcion() << endl;
        break ;
 
     case 'R' :
-       objeto_activo->reset();
+       objetos3[objetoActivo3]->reset();
        res = true;
        cout << "visualización reseteada" << endl;
        break ;
 
     case '>' :
        if (animacion_activada) {
-         (objeto_activo->leerPtrParametro(param_actual) )->acelerar();
+         (objetos3[objetoActivo3]->leerPtrParametro(param_actual) )->acelerar();
        } else {
-         (objeto_activo->leerPtrParametro(param_actual) )->incrementar();
+         (objetos3[objetoActivo3]->leerPtrParametro(param_actual) )->incrementar();
        }
        res = true;
        break ;
 
     case '<' :
        if (animacion_activada) {
-         (objeto_activo->leerPtrParametro(param_actual) )->decelerar();
+         (objetos3[objetoActivo3]->leerPtrParametro(param_actual) )->decelerar();
        } else {
-         (objeto_activo->leerPtrParametro(param_actual) )->decrementar();
+         (objetos3[objetoActivo3]->leerPtrParametro(param_actual) )->decrementar();
        }
        res = true;
       break;
@@ -97,8 +111,8 @@ bool P3_FGE_PulsarTeclaCaracter( unsigned char tecla ) {
 // (se accede con 'cv.modoVisu')
 
 void P3_DibujarObjetos( ContextoVis & cv ) {
-  if (objeto_activo != nullptr) {
-    objeto_activo->visualizarGL( cv );
+  if (objetos3[objetoActivo3] != nullptr) {
+    objetos3[objetoActivo3]->visualizarGL( cv );
   }
 }
 
@@ -106,7 +120,7 @@ void P3_DibujarObjetos( ContextoVis & cv ) {
 
 bool P3_FGE_Desocupado() {
    if (animacion_activada) {
-     objeto_activo->siguienteCuadro();
+     objetos3[objetoActivo3]->siguienteCuadro();
      redibujar_ventana = true;
    }
    return animacion_activada;

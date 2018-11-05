@@ -16,8 +16,7 @@ Parametro::Parametro(const std::string &p_descripcion, Matriz4f *p_ptr_mat,
   float p_c, float p_s, float p_f ) : descripcion (p_descripcion),
   ptr_mat (p_ptr_mat), fun_calculo_matriz (p_fun_calculo_matriz),
   acotado (p_acotado), c (p_c), s (p_s), f (p_f), vel(v_0) {
-   // COMPLETAR: práctica 3: inicializar un parámetro
-   // ....
+
 }
 // -----------------------------------------------------------------------------
 void Parametro::ActualizarMatriz() {

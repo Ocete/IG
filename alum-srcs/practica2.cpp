@@ -55,7 +55,7 @@ bool P2_FGE_PulsarTeclaCaracter( unsigned char tecla )
       return false ;
 
    objetoActivo2 = (objetoActivo2+1) % numObjetos2 ;
-   cout << "práctica 1: nuevo objeto activo es: " << objetoActivo2 ;
+   cout << "práctica 2: nuevo objeto activo es: " << objetoActivo2 ;
    if ( objetos2[objetoActivo2] != nullptr )
       cout << " (" << objetos2[objetoActivo2]->leerNombre() << ")." << endl ;
    else

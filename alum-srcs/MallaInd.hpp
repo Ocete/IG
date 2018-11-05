@@ -16,7 +16,6 @@
 
 class MallaInd : public Objeto3D
 {
-
    protected:
       std::vector<Tupla3f> vertices;
       std::vector<Tupla3f> colores;
@@ -41,9 +40,9 @@ class MallaInd : public Objeto3D
       void visualizarDE_MI( ContextoVis & cv );
       // visualizar en modo inmediato con 'glVertex3fv'
       void visualizarDE_MI_Vertex( ContextoVis & cv );
-      // visualizar en modo inmediato con 'glVertex3fv'
+      // visualizar en modo inmediato con 'glDrawArrays'
       void visualizarDE_MI_DrawArrays( ContextoVis & cv );
-      // visualizar en modo inmediato con 'glVertex3fv'
+      // visualizar en modo inmediato con 'glDrawElements'
       void visualizarDE_MI_DrawElements( ContextoVis & cv );
 
       // Crea un único VBO
@@ -59,6 +58,7 @@ class MallaInd : public Objeto3D
 
       // incializa el array de colores
       void asignarColores();
+      virtual void fijarColorNodo(const Tupla3f &nuevo_color);
 
    public:
       // crea una malla vacía (nombre: "malla indexada nueva vacía")

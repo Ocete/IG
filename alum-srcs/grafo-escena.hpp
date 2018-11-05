@@ -63,14 +63,14 @@ struct EntradaNGE
 class NodoGrafoEscena : public Objeto3D {
 protected:
      std::vector<EntradaNGE> entradas ;
-
+     bool color_fijado;
 public:
 
    NodoGrafoEscena() ;
 
    // visualiza usando OpenGL
    virtual void visualizarGL( ContextoVis & cv ) ;
-   void fijarColorNodo( const Tupla3f & nuevo_color ) ;
+   virtual void fijarColorNodo( const Tupla3f & nuevo_color ) ;
 
    // calcular y obtener la caja englobante
    //virtual CajaEngf cajaEnglobante() ;
@@ -105,7 +105,6 @@ class NodoGrafoEscenaParam : public NodoGrafoEscena
 {
    protected:
       std::vector<Parametro> parametros ; // vector de parámetros
-
    public:
       // devuelve el número de parámetros
       int numParametros();
@@ -125,10 +124,10 @@ class NodoGrafoEscenaParam : public NodoGrafoEscena
 
 // clase para la práctica 3
 class C : public NodoGrafoEscenaParam {
+  std::string nombre;
 public:
-  C();
+  C(bool atraccion);
 } ;
-
 
 // *********************************************************************
 // clase para modelizar un Asiento
@@ -192,6 +191,41 @@ public:
 class Atraccion : public NodoGrafoEscena {
 public:
   Atraccion(std::vector<Parametro> *v);
+} ;
+
+// *********************************************************************
+
+class Ojo : public NodoGrafoEscena {
+public:
+  Ojo(float ang);
+} ;
+
+// *********************************************************************
+
+class Pata : public NodoGrafoEscena {
+public:
+  Pata(std::vector<Parametro> *v, int num);
+} ;
+
+// *********************************************************************
+
+class ParDePatas : public NodoGrafoEscena {
+public:
+  ParDePatas(std::vector<Parametro> *v, int num);
+} ;
+
+// *********************************************************************
+
+class Cuerpo : public NodoGrafoEscena {
+public:
+  Cuerpo(std::vector<Parametro> *v);
+} ;
+
+// *********************************************************************
+
+class Colgante : public NodoGrafoEscena {
+public:
+  Colgante(std::vector<Parametro> *v);
 } ;
 
 // *********************************************************************
