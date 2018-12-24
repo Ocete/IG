@@ -13,8 +13,8 @@
 
 using namespace std ;
 
-static constexpr int numObjetos3 = 2;
-static NodoGrafoEscenaParam * objetos3[numObjetos3] = {nullptr, nullptr};
+static constexpr int numObjetos3 = 3;
+static NodoGrafoEscenaParam * objetos3[numObjetos3] = {nullptr, nullptr, nullptr};
 static unsigned objetoActivo3 = 0 ;
 
 bool animacion_activada = false;
@@ -33,6 +33,7 @@ void P3_Inicializar(  )
 
    objetos3[0] = new C(true);
    objetos3[1] = new C(false);
+   objetos3[2] = new C2();
    cout << "hecho." << endl << flush ;
 }
 

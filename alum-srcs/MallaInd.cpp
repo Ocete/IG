@@ -32,17 +32,47 @@ MallaInd::MallaInd( const std::string & nombreIni )
    id_vbo_vertices = 0;
    id_vbo_caras = 0;
    id_vbo_colores = 0;
+   id_vbo_normales = 0;
 }
 
 // -----------------------------------------------------------------------------
 
-// calcula las dos tablas de normales
-void MallaInd::calcular_normales()
-{
-   // COMPLETAR: en la práctica 2: calculo de las normales de la malla
-   // .......
+// Calcula las dos tablas de normales
+void MallaInd::calcular_normales() {
+  using namespace std;
+  if (normales_caras.size() == 0) {
 
+    // Calculamos las normales de las caras
+    Tupla3f a,b;
+    for (int i=0; i<caras.size(); i++) {
+      a = vertices[ caras[i](1) ] - vertices[ caras[i](0) ];
+      b = vertices[ caras[i](2) ] - vertices[ caras[i](0) ];
+      b = a.cross(b);
+      // Quitar esta condicion en cuanto se pueda
+      if (b(0) != 0 || b(1) != 0 || b(2) != 0) {
+        normales_caras.push_back( b.normalized() );
+      } else {
+        normales_caras.push_back( b );
+      }
+    }
 
+    // Calculamos las normales de los vertices y normalizamos
+    a = {0,0,0};
+    normales_vertices = std::vector<Tupla3f> (vertices.size(), a);
+    for (int i=0; i<caras.size(); i++) {
+      b = normales_caras[i];
+      for (int j=0; j<2; j++) {
+        normales_vertices[ caras[i](j) ] = b + normales_vertices[ caras[i](j) ];
+      }
+    }
+    for (int i=0; i<vertices.size(); i++) {
+      // Quitar esta condicion en cuanto se pueda
+      if (normales_vertices[i](0) != 0 || normales_vertices[i](1) != 0
+            || normales_vertices[i](2) != 0) {
+        normales_vertices[i] = normales_vertices[i].normalized();
+      }
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -114,9 +144,54 @@ void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
 
 // -----------------------------------------------------------------------------
 
+void MallaInd::ColoresExamen( std::vector<Tupla3f> &colores_sec, int num_ver ) {
+  colores_sec.clear();
+  for ( unsigned i=0; i<num_ver; i++ ) {
+    colores_sec.push_back( Tupla3f( (float) (rand() % 100) / 100,
+                (float) (rand() % 100) / 100, (float) (rand() % 100) / 100));
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_MI_DrawExamen( ContextoVis & cv ) {
+    std::vector<Tupla3f> vertices_sec;
+    std::vector<Tupla3f> colores_sec;
+
+    for ( unsigned i=0; i<caras.size(); i++ ) {
+      for( unsigned j=0 ; j<3 ; j++ ) {
+        vertices_sec.push_back( vertices[ caras[i](j) ] );
+      }
+    }
+
+    ColoresExamen(colores_sec, vertices.size());
+
+    // Si hay colores, habilitar punteros a colores y establecer direccion y
+    // estructura de estos
+    if (colores.size() > 0) {
+      glEnableClientState( GL_COLOR_ARRAY );
+      glColorPointer( 3, GL_FLOAT, 0, colores_sec.data() );
+    }
+
+    // habilitar punteros a vertices y establecer direccion y estructura de estos
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glVertexPointer( 3, GL_FLOAT, 0, vertices_sec.data() );
+
+    // dibujar
+    glDrawArrays( GL_TRIANGLES, 0, vertices_sec.size() );
+
+    // inhabilitar punteros
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+}
+
+// -----------------------------------------------------------------------------
+
 void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
-  typedef enum { modoVertex, modoDrawArrays, modoDrawElements} modo_directo;
-  modo_directo mod = modoDrawElements;
+  typedef enum { modoVertex, modoDrawArrays, modoDrawElements, modoDrawExamen}
+      modo_directo;
+  modo_directo mod = cv.modoVis ==  modoExamen ?
+      modoDrawExamen : modoDrawElements;
 
   switch (mod) {
     case modoVertex:
@@ -127,6 +202,9 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       break;
     case modoDrawElements:
       visualizarDE_MI_DrawElements(cv);
+      break;
+    case modoDrawExamen:
+      visualizarDE_MI_DrawExamen(cv);
   }
 }
 
@@ -159,6 +237,10 @@ void MallaInd::inicializarVBOs() {
   if (colores.size() > 0)
     id_vbo_colores = crearVBO (GL_ARRAY_BUFFER, tam_vertices, colores.data());
 
+  if (normales_vertices.size() > 0)
+    id_vbo_normales = crearVBO(GL_ARRAY_BUFFER, tam_vertices,
+          normales_vertices.data());
+
   vbo_creado = true;
 }
 
@@ -174,6 +256,14 @@ void MallaInd::visualizarDE_VBOs( ContextoVis & cv ) {
     glBindBuffer( GL_ARRAY_BUFFER, id_vbo_colores );
     glColorPointer( 3, GL_FLOAT, 0, 0 );
     glEnableClientState( GL_COLOR_ARRAY );
+    glBindBuffer( GL_ARRAY_BUFFER, 0);
+  }
+
+  // Configurar VBO de normales
+  if ( normales_vertices.size() > 0 ) {
+    glBindBuffer( GL_ARRAY_BUFFER, id_vbo_normales );
+    glNormalPointer( GL_FLOAT, 0, 0 );
+    glEnableClientState( GL_NORMAL_ARRAY );
     glBindBuffer( GL_ARRAY_BUFFER, 0);
   }
   // Configurar VBO de vertices
@@ -197,6 +287,7 @@ void MallaInd::PolygonMode ( ContextoVis & cv ) {
   GLenum mode;
   switch(cv.modoVis) {
     case modoSolido:
+    case modoExamen:
       mode = GL_FILL;
       break;
     case modoPuntos:
@@ -212,6 +303,8 @@ void MallaInd::PolygonMode ( ContextoVis & cv ) {
 
 void MallaInd::visualizarGL( ContextoVis & cv ) {
   PolygonMode( cv );
+
+  glShadeModel( GL_SMOOTH );
 
   if (cv.usarVBOs) {
    visualizarDE_VBOs(cv);
@@ -249,9 +342,9 @@ Cubo::Cubo(float lado) : MallaInd( "malla cubo" ) {
                 lado*Tupla3f(1,1,0), lado*Tupla3f(0,0,1), lado*Tupla3f(1,0,1),
                 lado*Tupla3f(0,1,1), lado*Tupla3f(1,1,1)};
 
-  caras = { Tupla3i(0,2,1), Tupla3i(1,2,3), Tupla3i(0,4,1), Tupla3i(1,4,5),
-            Tupla3i(1,5,3), Tupla3i(3,5,7), Tupla3i(2,3,7), Tupla3i(2,7,6),
-            Tupla3i(0,4,2), Tupla3i(2,4,6), Tupla3i(4,6,5), Tupla3i(5,6,7)};
+  caras = { Tupla3i(0,2,1), Tupla3i(1,2,3), Tupla3i(0,1,4), Tupla3i(1,5,4),
+            Tupla3i(1,3,5), Tupla3i(3,7,5), Tupla3i(2,7,3), Tupla3i(2,6,7),
+            Tupla3i(0,4,2), Tupla3i(2,4,6), Tupla3i(4,5,6), Tupla3i(5,7,6)};
 
   // Esta llamada tiene que realizarse despues de asignar los vertices
   asignarColores();
@@ -266,7 +359,7 @@ Tetraedro::Tetraedro(float lado) : MallaInd( "malla tetraedro") {
               lado*Tupla3f(0.5,sqrt(0.75/3),2*sqrt(2*0.75)/3)};
 
   caras = { Tupla3i(0,2,1), Tupla3i(0,1,3),
-            Tupla3i(0,2,3), Tupla3i(1,2,3)};
+            Tupla3i(0,3,2), Tupla3i(1,2,3)};
 
   // Esta llamada tiene que realizarse despues de asignar los vertices
   asignarColores();

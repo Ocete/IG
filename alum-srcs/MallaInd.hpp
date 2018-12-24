@@ -20,6 +20,8 @@ class MallaInd : public Objeto3D
       std::vector<Tupla3f> vertices;
       std::vector<Tupla3f> colores;
       std::vector<Tupla3i> caras;
+      std::vector<Tupla3f> normales_caras;
+      std::vector<Tupla3f> normales_vertices;
 
       // Tamaños de las tablas de vertices y caras en bytes
       unsigned tam_vertices;
@@ -32,6 +34,7 @@ class MallaInd : public Objeto3D
       GLuint id_vbo_vertices;
       GLuint id_vbo_caras;
       GLuint id_vbo_colores;
+      GLuint id_vbo_normales;
 
       // calculo de las normales de esta malla
       void calcular_normales();
@@ -44,6 +47,10 @@ class MallaInd : public Objeto3D
       void visualizarDE_MI_DrawArrays( ContextoVis & cv );
       // visualizar en modo inmediato con 'glDrawElements'
       void visualizarDE_MI_DrawElements( ContextoVis & cv );
+      // visualizar en modo inmediato para el Examen
+      void visualizarDE_MI_DrawExamen( ContextoVis & cv );
+
+      void ColoresExamen( std::vector<Tupla3f> &colores_sec, int num_ver );
 
       // Crea un único VBO
       GLuint crearVBO( GLuint tipo, GLuint tam, GLvoid * puntero );

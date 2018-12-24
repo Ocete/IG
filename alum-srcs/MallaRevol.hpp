@@ -72,4 +72,16 @@ Esfera ( const int num_verts_per,
         const float radio);
 } ;
 
+// ---------------------------------------------------------------------
+
+class Toroide : public MallaRevol {
+public:
+Toroide ( const int num_verts_per,
+        const int nperfiles,
+        const bool cerrar_malla,
+        const float desplazamiento,
+        const float radio);
+} ;
+
+
 #endif

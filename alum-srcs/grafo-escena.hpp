@@ -127,6 +127,7 @@ class C : public NodoGrafoEscenaParam {
   std::string nombre;
 public:
   C(bool atraccion);
+  C(); // Ojo, este constructor no hace NADA
 } ;
 
 // *********************************************************************
@@ -229,5 +230,33 @@ public:
 } ;
 
 // *********************************************************************
+
+class Brazo : public NodoGrafoEscena {
+public:
+  Brazo(Tupla3f color);
+} ;
+
+// *********************************************************************
+
+class BrazoOrientado : public NodoGrafoEscena {
+public:
+  BrazoOrientado(std::vector<Parametro> *v, float ang, Tupla3f color);
+} ;
+
+// *********************************************************************
+
+class Tronco : public NodoGrafoEscena {
+public:
+  Tronco(std::vector<Parametro> *v);
+} ;
+
+// *********************************************************************
+
+class C2 : public C {
+  std::string nombre;
+public:
+  C2();
+} ;
+
 
 #endif // GRAFO_ESCENA_HPP

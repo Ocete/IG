@@ -628,8 +628,8 @@ void Inicializa_OpenGL( )
    // https://www.opengl.org/wiki/Depth_Buffer
    glEnable( GL_DEPTH_TEST );
 
-   // deshabilitar filtro de triangulos por su orientación:
-   glDisable( GL_CULL_FACE );
+   // habilitar filtro de triangulos por su orientación:
+   glEnable( GL_CULL_FACE );
 
    // establecer color de fondo: (1,1,1) (blanco)
    glClearColor( 1.0, 1.0, 1.0, 1.0 ) ;

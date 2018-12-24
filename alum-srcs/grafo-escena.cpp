@@ -455,3 +455,66 @@ Colgante::Colgante(vector<Parametro> *v) {
 }
 
 // -----------------------------------------------------------------------------
+
+Brazo::Brazo(Tupla3f color) {
+  cout << "Constructor Brazo comienza" << endl;
+  agregar( MAT_Rotacion(90, 0, 0, 1) );
+  agregar( new Esfera(20,50,false,false,1) );
+  agregar( MAT_Traslacion(0, 1, 0) );
+  agregar( new Cilindro(10, 30, true, true, 3, 0.25) );
+  agregar( MAT_Traslacion(0, 4, 0) );
+  agregar( new Esfera(20,50,false,false,1) );
+
+  fijarColorNodo(color);
+  cout << "Constructor Brazo termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+BrazoOrientado::BrazoOrientado(vector<Parametro> *v, float ang, Tupla3f color) {
+  cout << "Constructor BrazoOrientado comienza" << endl;
+  agregar( MAT_Rotacion(0, 0, 0, 1) ); // MAT param
+  agregar( MAT_Rotacion(ang, 0, 0, 1) );
+  agregar( new Brazo(color) );
+
+  // Parámetro asociado
+  v->push_back( Parametro ("Giro del brazo orientado",
+                entradas[0].matriz,
+                [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
+                true, 0, 45, 0.1) );
+
+  cout << "Constructor BrazoOrientado termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+Tronco::Tronco(std::vector<Parametro> *v) {
+  cout << "Constructor Tronco comienza" << endl;
+  agregar( MAT_Rotacion(0, 0, 0, 1) ); // MAT param
+  agregar( new Brazo(Tupla3f(1,0,0)) );
+  agregar( MAT_Traslacion(-5, 0, 0) );
+  agregar( new BrazoOrientado(v, 45, Tupla3f(0,0,1) ) );
+  agregar( new BrazoOrientado(v, -45, Tupla3f(0,1,0)) );
+
+  v->push_back( Parametro ("Giro del tronco",
+                entradas[0].matriz,
+                [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
+                true, 0, 45, 0.1) );
+
+  cout << "Constructor Tronco termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+C2::C2() {
+  cout << "Constructor C2 comienza" << endl;
+  agregar( new Tronco( &parametros ) );
+  nombre = "Tronco";
+  cout << "Constructor C2 termina" << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+C::C() { }
+
+// -----------------------------------------------------------------------------

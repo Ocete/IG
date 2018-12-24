@@ -77,7 +77,7 @@ void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
     if (vertices[0](0) != 0) {
       vertices.push_back( Tupla3f{0, vertices[0](1), 0} );
       for (int i=0; i<nper; i++) {
-        caras.push_back( Tupla3i{i_f, i*nvp, ((i+1)%nper)*nvp} );
+        caras.push_back( Tupla3i{i*nvp, i_f, ((i+1)%nper)*nvp} );
       }
       i_f++;
     }
@@ -142,15 +142,38 @@ Esfera::Esfera (const int num_verts_per, const int nperfiles,
   vector<Tupla3f> perfil_original;
   for (int i=0; i<=num_verts_per; i++) {
     perfil_original.push_back( Tupla3f{radio*i/num_verts_per,
-                                      radio*sqrt(1 - (float) i*i/(num_verts_per*num_verts_per)), 0} );
-  }
+      -radio*sqrt(1 - (float) i*i/(num_verts_per*num_verts_per)), 0} );
+    }
   for (int i=num_verts_per; i>=0; i--) {
     perfil_original.push_back( Tupla3f{radio*i/num_verts_per,
-                                      -radio*sqrt(1 - (float) i*i/(num_verts_per*num_verts_per)), 0} );
+      radio*sqrt(1 - (float) i*i/(num_verts_per*num_verts_per)), 0} );
   }
   crearMallaRevol (perfil_original, nperfiles, false, cerrar_malla );
 
   ponerNombre("Esfera");
+  asignarColores();
+  calcular_normales();
+}
+
+// *****************************************************************************
+
+Toroide::Toroide (const int num_verts_per, const int nperfiles,
+      const bool cerrar_malla, const float desplazamiento,
+      const float radio) {
+
+  assert (num_verts_per != 0);
+
+  vector<Tupla3f> perfil_original;
+  float ang_incr = 2*3.14159265 / num_verts_per, ang = 0;
+  for (int i=0; i<=num_verts_per+1; i++) {
+    perfil_original.push_back( Tupla3f{desplazamiento + cos(ang),
+              radio + sin(ang), 0} );
+    ang += ang_incr;
+  }
+
+  crearMallaRevol (perfil_original, nperfiles, false, cerrar_malla );
+
+  ponerNombre("Toroide");
   asignarColores();
   calcular_normales();
 }
