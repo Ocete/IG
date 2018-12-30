@@ -170,6 +170,8 @@ void DibujarEscena()
    else
       FijarMVPOpenGL();
 
+
+
    LimpiarVentana();
    glUseProgram( id_programa );
    DibujarEjesSolido() ;
@@ -265,7 +267,7 @@ void FGE_PulsarTeclaCaracter( GLFWwindow* window, unsigned int codepoint )
          break ;
       case 'P' :
          //practicaActual = (practicaActual % numPracticas) +1 ;
-         practicaActual = (practicaActual) % 3 + 1;
+         practicaActual = (practicaActual) % 4 + 1;
 
          cout << "Práctica actual cambiada a: " << practicaActual << endl << flush ;
          if ( practicaActual == 3 )
@@ -285,7 +287,7 @@ void FGE_PulsarTeclaCaracter( GLFWwindow* window, unsigned int codepoint )
         }
         break ;
       case 'M' :
-         contextoVis.modoVis = ModosVis((int(contextoVis.modoVis)+1) % numModosVis) ;
+         contextoVis.modoVis = ModosVis((int(contextoVis.modoVis)+1) % (numModosVis-2)) ;
          cout << "modo de visualización cambiado a: '" << nombreModo[contextoVis.modoVis] << "'" << endl << flush ;
          break ;
 
@@ -303,7 +305,7 @@ void FGE_PulsarTeclaCaracter( GLFWwindow* window, unsigned int codepoint )
                redibujar = P3_FGE_PulsarTeclaCaracter( tecla ) ; // true si es necesario redibujar
                break ;
             case 4 :
-               redibujar = P4_FGE_PulsarTeclaCaracter( tecla ) ; // true si es necesario redibujar
+               redibujar = P4_FGE_PulsarTeclaCaracter( tecla, contextoVis ) ; // true si es necesario redibujar
                break ;
             case 5 :
                redibujar = P5_FGE_PulsarTeclaCaracter( tecla ) ; // true si es necesario redibujar
@@ -596,7 +598,7 @@ void Inicializa_GLFW( int argc, char * argv[] )
 void Inicializa_Vars( )
 {
    // inicializar práctica actual
-   practicaActual = 1 ;
+   practicaActual = 4 ;
    contextoVis.modoVis = modoMateriales ;
 }
 
@@ -685,7 +687,7 @@ void Inicializar( int argc, char *argv[] )
    P3_Inicializar(  );
 
    // inicializar la práctica 4
-   P4_Inicializar(  );
+   P4_Inicializar( contextoVis );
 
    // inicializar la práctica 5
    P5_Inicializar( ventana_tam_x, ventana_tam_y );
@@ -700,13 +702,14 @@ void BucleEventosGLFW()
 
    terminar_programa = false ;
 
-   while ( ! terminar_programa  )
-   {
+   while ( ! terminar_programa  ) {
+
       if ( redibujar_ventana )   // si ha cambiado algo:
       {
          VisualizarFrame();            // dibujar la escena
          redibujar_ventana = false ;   // evitar que se redibuje continuamente
       }
+
       if ( func_desocupado_actual == nullptr ) // si no hay definida la función 'desocupado'
          glfwWaitEvents();                     //    esperar hasta que haya un evento y llamar a la función correspondiente, si está definida
       else                                     // si hay una función 'desocupado' activa
@@ -715,6 +718,7 @@ void BucleEventosGLFW()
             func_desocupado_actual();          //       ejecutar la función 'idle' actual (ya no hay eventos pendientes)
       }
       terminar_programa = terminar_programa || glfwWindowShouldClose( glfw_window ) ;
+
    }
 
    glfwTerminate();

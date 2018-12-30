@@ -22,17 +22,22 @@ protected:
     // numero de vertices por perfil
     int nvp;
 
-    // Método que crea las tablas vertices y triangulos
+    // Crea las tablas vertices y triangulos
     void crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
       const int nperfiles, const bool crear_tapas,
       const bool cerrar_malla ) ;
+
+    // Asigna las coordenadas de textura al perfil, NO a las tapas
+    void asignarCoordenadasTextura(
+      const std::vector<Tupla3f> & perfil_original, const int nperfiles);
 
 public:
       // crea una malla de revolucion
       MallaRevol( const std::string & nombre_arch,
                   const int nperfiles,
                   const bool crear_tapas,
-                  const bool cerrar_malla ) ;
+                  const bool cerrar_malla,
+                  const bool crear_textura ) ;
 
       // Constructor vacio
       MallaRevol () {}

@@ -259,4 +259,22 @@ public:
 } ;
 
 
+//**********************************************************************
+
+class C4 : public C {
+  std::string nombre;
+public:
+  C4();
+} ;
+
+//**********************************************************************
+
+class PeonP4 : public NodoGrafoEscenaParam {
+  std::string nombre;
+public:
+  // 0 = Madera, 1 = Blanco, 2 = Negro
+  PeonP4(int tipo);
+} ;
+
+
 #endif // GRAFO_ESCENA_HPP

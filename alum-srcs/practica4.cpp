@@ -9,25 +9,30 @@
 #include "tuplasg.hpp"   // Tupla3f
 #include "practicas.hpp"
 #include "practica3.hpp"
-
+#include "grafo-escena.hpp"
 
 using namespace std ;
 
-// COMPLETAR: práctica 4: declaración de variables de la práctica 4 (static)
-// ....
-
+static C4 * c4;
+//static ColFuentesLuz colFuentes;
+int angulo_activo;
 
 // ---------------------------------------------------------------------
 // Función para implementar en la práctica 4 para inicialización.
 // Se llama una vez al inicio, cuando ya se ha creado la ventana e
 // incializado OpenGL.
 
-void P4_Inicializar(  )
-{
+void P4_Inicializar( ContextoVis & cv ) {
    cout << "Creando objetos de la práctica 4 .... " << flush ;
 
-   // COMPLETAR: práctica 4: inicializar objetos de la práctica 4
-   // ....
+   c4 = new C4();
+
+   cv.colFuentes = new ColFuentesLuz();
+   angulo_activo = 0;
+   cv.colFuentes->activar(0);
+
+   cv.colFuentes->insertar( new FuenteDireccional(0, 0, VectorRGB(1,1,1,1) ) );
+   cv.colFuentes->insertar( new FuentePosicional( {10,0,10}, {1,1,1,0} ) );
 
    cout << "hecho." << endl << flush ;
 }
@@ -41,34 +46,30 @@ void P4_Inicializar(  )
 //  - devuelve 'false' si la tecla no se usa en esta práctica (no ha
 //    cambiado nada)
 
-bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla )
-{
-   bool res = false  ; // valor devuelto: es true solo cuando se ha procesado alguna tecla
+bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla, ContextoVis & cv ) {
+   bool res = false  ;
+   int key = -1;
 
-   switch ( toupper( tecla ) )
-   {
-      case 'G' :
-         // COMPLETAR: práctica 4: activar el siguiente ángulo (longitud o latitud)
-         // ....
+  switch ( toupper( tecla ) ) {
+    case 'G' :
+      angulo_activo  = ( angulo_activo + 1 ) % 2;
+      break ;
 
-         break ;
+    case '>' :
+      key = angulo_activo == 0 ? GLFW_KEY_UP : GLFW_KEY_RIGHT;
+      break ;
 
-      case '>' :
-         // COMPLETAR: práctica 4: incrementar el ángulo activo
-         // ....
+    case '<' :
+      key = angulo_activo == 0 ? GLFW_KEY_DOWN : GLFW_KEY_LEFT;
+      break ;
+    default :
+      break ;
+  }
+  if (key != -1) {
+    res = cv.colFuentes->ptrFuente(0)->gestionarEventoTeclaEspecial(key);
+  }
 
-         break ;
-
-      case '<' :
-         // COMPLETAR: práctica 4: decrementar el ángulo activo
-         // ....
-
-         break ;
-      default :
-         break ;
-   }
-   return res ;
-
+  return res ;
 }
 
 // ---------------------------------------------------------------------
@@ -76,10 +77,14 @@ bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla )
 // se debe de usar el modo de dibujo que hay en el parámetro 'cv'
 // (se accede con 'cv.modoVisu')
 
-void P4_DibujarObjetos( ContextoVis & cv )
-{
-   // COMPLETAR: práctica 4: visualizar objetos
-   //     (requiere activar las fuentes de luz y luego dibujar el grafo de escena)
-   // ....
-
+void P4_DibujarObjetos( ContextoVis & cv ) {
+  if (c4 != nullptr) {
+    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+      glEnable( GL_LIGHTING );
+      cv.colFuentes->activar( 0 );
+    } else {
+      glDisable( GL_LIGHTING );
+    }
+    c4->visualizarGL( cv );
+  }
 }

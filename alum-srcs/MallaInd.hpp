@@ -22,10 +22,12 @@ class MallaInd : public Objeto3D
       std::vector<Tupla3i> caras;
       std::vector<Tupla3f> normales_caras;
       std::vector<Tupla3f> normales_vertices;
+      std::vector<Tupla2f> coordenadas_textura;
 
       // Tamaños de las tablas de vertices y caras en bytes
       unsigned tam_vertices;
       unsigned tam_caras;
+      unsigned tam_texturas;
 
       // Almacena si los VBOs se han creado ya
       bool vbo_creado = false;
@@ -35,6 +37,7 @@ class MallaInd : public Objeto3D
       GLuint id_vbo_caras;
       GLuint id_vbo_colores;
       GLuint id_vbo_normales;
+      GLuint id_vbo_texturas;
 
       // calculo de las normales de esta malla
       void calcular_normales();
@@ -47,6 +50,13 @@ class MallaInd : public Objeto3D
       void visualizarDE_MI_DrawArrays( ContextoVis & cv );
       // visualizar en modo inmediato con 'glDrawElements'
       void visualizarDE_MI_DrawElements( ContextoVis & cv );
+      // visualizar en modo inmediato con sombreado plano
+      void visualizarDE_MI_SombreadoPlano( ContextoVis & cv );
+      // visualizar en modo inmediato con sombreado suave (Gouroud)
+      void visualizarDE_MI_SombreadoSuave( ContextoVis & cv );
+      // visualizar en modo inmediato con sombreado suave (Gouroud)
+      void visualizarDE_MI_Sombreado( ContextoVis & cv );
+
       // visualizar en modo inmediato para el Examen
       void visualizarDE_MI_DrawExamen( ContextoVis & cv );
 
@@ -59,6 +69,9 @@ class MallaInd : public Objeto3D
       void inicializarVBOs();
       // visualizar con 'draw elements', en modo diferido (con VBOS)
       void visualizarDE_VBOs( ContextoVis & cv );
+      // visualizar con VBO utilizando las texturas
+      void visualizarDE_VBOs_NT( ContextoVis & cv );
+
 
       // configurar el modo de los polígonos
       void PolygonMode ( ContextoVis & cv );

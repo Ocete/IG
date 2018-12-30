@@ -47,8 +47,8 @@ void MallaInd::calcular_normales() {
     for (int i=0; i<caras.size(); i++) {
       a = vertices[ caras[i](1) ] - vertices[ caras[i](0) ];
       b = vertices[ caras[i](2) ] - vertices[ caras[i](0) ];
-      b = a.cross(b);
-      // Quitar esta condicion en cuanto se pueda
+      b = b.cross(a);
+      // Normalizamos si no es 0
       if (b(0) != 0 || b(1) != 0 || b(2) != 0) {
         normales_caras.push_back( b.normalized() );
       } else {
@@ -56,7 +56,7 @@ void MallaInd::calcular_normales() {
       }
     }
 
-    // Calculamos las normales de los vertices y normalizamos
+    // Calculamos las normales de los vertices
     a = {0,0,0};
     normales_vertices = std::vector<Tupla3f> (vertices.size(), a);
     for (int i=0; i<caras.size(); i++) {
@@ -66,7 +66,7 @@ void MallaInd::calcular_normales() {
       }
     }
     for (int i=0; i<vertices.size(); i++) {
-      // Quitar esta condicion en cuanto se pueda
+      // Normalizamos si no es 0
       if (normales_vertices[i](0) != 0 || normales_vertices[i](1) != 0
             || normales_vertices[i](2) != 0) {
         normales_vertices[i] = normales_vertices[i].normalized();
@@ -130,16 +130,75 @@ void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
     glColorPointer( 3, GL_FLOAT, 0, colores.data() );
   }
 
+  // Repetimos para las normales
+  if (normales_vertices.size() > 0) {
+    glEnableClientState ( GL_NORMAL_ARRAY );
+    glNormalPointer ( GL_FLOAT, 0, normales_vertices.data() );
+  }
+
   // habilitar punteros a vertices y establecer direccion y estructura de estos
   glEnableClientState( GL_VERTEX_ARRAY );
   glVertexPointer( 3, GL_FLOAT, 0, vertices.data() );
 
-  // dibujar
+  // Dibujar
   glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
 
-  // inhabilitar punteros
+  // Inhabilitar punteros
   glDisableClientState( GL_VERTEX_ARRAY );
   glDisableClientState( GL_COLOR_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_MI_SombreadoPlano( ContextoVis & cv ) {
+  glShadeModel( GL_FLAT );
+  visualizarDE_MI_Sombreado(cv);
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_MI_SombreadoSuave( ContextoVis & cv ) {
+  glShadeModel( GL_SMOOTH );
+  visualizarDE_MI_Sombreado(cv);
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
+  //glBegin( GL_TRIANGLES );
+  int index;
+  /*if (coordenadas_textura.size() == 0) {
+    glColor3fv( Tupla3f{0.7,0,0.7} );
+  }
+
+  for ( unsigned i=0; i<caras.size(); i++ ) {
+    for( unsigned j=0 ; j<3 ; j++ ) {
+      index = caras[i](j);
+      if ( coordenadas_textura.size() > 0 ) {
+        glTexCoord2fv( coordenadas_textura[ index ] );
+      }
+      if ( normales_vertices.size() > 0 ) {
+        glNormal3fv( normales_vertices[ index ] );
+      }
+      glVertex3fv( vertices[ index ] );
+    }
+  }
+  glEnd();*/
+
+  glVertexPointer(3,GL_FLOAT,0,vertices.data());
+  glTexCoordPointer(2,GL_FLOAT,0,coordenadas_textura.data());
+  glNormalPointer(GL_FLOAT,0,normales_vertices.data());
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+  glDrawElements(GL_TRIANGLES,3*caras.size(),GL_UNSIGNED_INT,caras.data());
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 // -----------------------------------------------------------------------------
@@ -188,23 +247,29 @@ void MallaInd::visualizarDE_MI_DrawExamen( ContextoVis & cv ) {
 // -----------------------------------------------------------------------------
 
 void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
-  typedef enum { modoVertex, modoDrawArrays, modoDrawElements, modoDrawExamen}
-      modo_directo;
-  modo_directo mod = cv.modoVis ==  modoExamen ?
-      modoDrawExamen : modoDrawElements;
 
-  switch (mod) {
-    case modoVertex:
-      visualizarDE_MI_Vertex(cv);
-      break;
-    case modoDrawArrays:
-      visualizarDE_MI_DrawArrays(cv);
-      break;
-    case modoDrawElements:
-      visualizarDE_MI_DrawElements(cv);
-      break;
-    case modoDrawExamen:
+  switch (cv.modoVis) {
+    case modoExamen:
+      glDisable( GL_LIGHTING );
+      glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawExamen(cv);
+      break;
+    case modoSombreadoPlano:
+      glEnable( GL_LIGHTING );
+      glEnable( GL_TEXTURE_2D );
+      visualizarDE_MI_SombreadoPlano(cv);
+      break;
+    case modoSombreadoSuave:
+      glEnable( GL_LIGHTING );
+      glEnable( GL_TEXTURE_2D );
+      visualizarDE_MI_SombreadoSuave(cv);
+      break;
+    default:
+      glDisable( GL_LIGHTING );
+      glDisable( GL_TEXTURE_2D );
+      visualizarDE_MI_DrawElements(cv);
+      // visualizarDE_MI_Vertex(cv);
+      // visualizarDE_MI_DrawArrays(cv);
   }
 }
 
@@ -230,6 +295,7 @@ GLuint MallaInd::crearVBO( GLuint tipo, GLuint tam, GLvoid * puntero ) {
 void MallaInd::inicializarVBOs() {
   tam_vertices = sizeof(float)* vertices.size() *3L;
   tam_caras = sizeof(int)* caras.size() *3L;
+  tam_texturas = sizeof(float)* coordenadas_textura.size() *2L;
 
   id_vbo_vertices = crearVBO (GL_ARRAY_BUFFER, tam_vertices, vertices.data());
   id_vbo_caras = crearVBO (GL_ELEMENT_ARRAY_BUFFER, tam_caras, caras.data());
@@ -240,6 +306,10 @@ void MallaInd::inicializarVBOs() {
   if (normales_vertices.size() > 0)
     id_vbo_normales = crearVBO(GL_ARRAY_BUFFER, tam_vertices,
           normales_vertices.data());
+
+  if (coordenadas_textura.size() > 0)
+    id_vbo_texturas = crearVBO (GL_ARRAY_BUFFER, tam_texturas,
+          coordenadas_textura.data());
 
   vbo_creado = true;
 }
@@ -256,7 +326,6 @@ void MallaInd::visualizarDE_VBOs( ContextoVis & cv ) {
     glBindBuffer( GL_ARRAY_BUFFER, id_vbo_colores );
     glColorPointer( 3, GL_FLOAT, 0, 0 );
     glEnableClientState( GL_COLOR_ARRAY );
-    glBindBuffer( GL_ARRAY_BUFFER, 0);
   }
 
   // Configurar VBO de normales
@@ -264,8 +333,8 @@ void MallaInd::visualizarDE_VBOs( ContextoVis & cv ) {
     glBindBuffer( GL_ARRAY_BUFFER, id_vbo_normales );
     glNormalPointer( GL_FLOAT, 0, 0 );
     glEnableClientState( GL_NORMAL_ARRAY );
-    glBindBuffer( GL_ARRAY_BUFFER, 0);
   }
+
   // Configurar VBO de vertices
   glBindBuffer( GL_ARRAY_BUFFER, id_vbo_vertices );
   glVertexPointer( 3, GL_FLOAT, 0, 0 );
@@ -277,8 +346,44 @@ void MallaInd::visualizarDE_VBOs( ContextoVis & cv ) {
   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
   glDisableClientState( GL_VERTEX_ARRAY );
-  if (colores.size() > 0)
-    glDisableClientState( GL_COLOR_ARRAY );
+  glDisableClientState( GL_COLOR_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_VBOs_NT( ContextoVis & cv ) {
+  if ( !vbo_creado ) {
+    inicializarVBOs();
+  }
+
+  // Configurar VBO de normales
+  if ( normales_vertices.size() > 0 ) {
+    glBindBuffer( GL_ARRAY_BUFFER, id_vbo_normales );
+    glNormalPointer( GL_FLOAT, 0, 0 );
+    glEnableClientState( GL_NORMAL_ARRAY );
+  }
+
+  // Configurar VBO de texturas
+  if ( coordenadas_textura.size() > 0 ) {
+    glBindBuffer( GL_ARRAY_BUFFER, id_vbo_texturas );
+    glTexCoordPointer( 2, GL_FLOAT, 0, 0 );
+    glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+  }
+
+  // Configurar VBO de vertices
+  glBindBuffer( GL_ARRAY_BUFFER, id_vbo_vertices );
+  glVertexPointer( 3, GL_FLOAT, 0, 0 );
+  glBindBuffer( GL_ARRAY_BUFFER, 0 ); // creo que esto sobra
+  glEnableClientState( GL_VERTEX_ARRAY );
+
+  glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, id_vbo_caras );
+  glDrawElements( GL_TRIANGLES, 3L*caras.size(), GL_UNSIGNED_INT, 0 ) ;
+  glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+  glDisableClientState( GL_VERTEX_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+  glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 }
 
 // -----------------------------------------------------------------------------
@@ -288,6 +393,8 @@ void MallaInd::PolygonMode ( ContextoVis & cv ) {
   switch(cv.modoVis) {
     case modoSolido:
     case modoExamen:
+    case modoSombreadoPlano:
+    case modoSombreadoSuave:
       mode = GL_FILL;
       break;
     case modoPuntos:
@@ -307,9 +414,16 @@ void MallaInd::visualizarGL( ContextoVis & cv ) {
   glShadeModel( GL_SMOOTH );
 
   if (cv.usarVBOs) {
-   visualizarDE_VBOs(cv);
+    if (!vbo_creado) {
+      inicializarVBOs();
+    }
+    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+      visualizarDE_VBOs_NT(cv);
+    } else {
+      visualizarDE_VBOs(cv);
+    }
   } else {
-   visualizarDE_MI(cv);
+    visualizarDE_MI(cv);
   }
 }
 

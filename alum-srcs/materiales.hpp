@@ -28,6 +28,9 @@
 #include "tuplasg.hpp"
 #include "jpg_imagen.hpp"
 
+// Incluido por mi:
+//#include "practicas.hpp"
+//#include "grafo-escena.hpp"
 
 // *********************************************************************
 // algunes declaraciones auxiliares importantes
@@ -109,18 +112,14 @@ class Textura
 
    void enviar() ;    // envia la imagen a la GPU (gluBuild2DMipmaps)
 
-   bool
-      enviada ; // true si ha sido enviada, false en otro caso
-   GLuint
-      ident_textura ;// 'nombre' o identif. de textura para OpenGL
-   jpg::Imagen *
-      imagen ;       // objeto con los bytes de la imagen de textura
-   ModoGenCT
-      modo_gen_ct ;  // modo de generacion de coordenadas de textura
-                     // (desactivadas si modo_gen_ct == mgct_desactivada)
-   float
-      coefs_s[4] ,   // si 'modo_gen_ct != desactivadas', coeficientes para la coord. S
-      coefs_t[4] ;   // idem para coordenada T
+   bool enviada ;          // true si ha sido enviada, false en otro caso
+   GLuint ident_textura ;  // 'nombre' o identif. de textura para OpenGL
+   jpg::Imagen *imagen ;   // objeto con los bytes de la imagen de textura
+   ModoGenCT modo_gen_ct ; // modo de generacion de coordenadas de textura
+                        // (desactivadas si modo_gen_ct == mgct_desactivada)
+
+   float coefs_s[4] ,   // si 'modo_gen_ct != desactivadas', coeficientes para la coord. S
+         coefs_t[4] ;   // idem para coordenada T
 } ;
 
 // *********************************************************************
@@ -175,21 +174,44 @@ class Material
 
     //--------------------------------------------------------
 
-   void coloresCero();// pone todos los colores y reflectividades a cero
+   void coloresCero();      // pone todos los colores y reflectividades a cero
 
-   std::string nombre_mat ;  // nombre del material
+   std::string nombre_mat ; // nombre del material
 
-   bool
-      iluminacion ;  // true si el material requiere activar iluminación,
-                     // false si requiere desactivarla
-   Textura *
-      tex ;          // si !=NULL, el material tiene esta textura
-   VectorRGB
-      color ;        // color del material cuando iluminacion=false
-   ColoresMat
-      del,           // reflectividades de caras delanteras, si iluminacion= true
-      tra ;          // reflectividades de caras traseras, si iluminacion=true
+   bool iluminacion ;       // true si el material requiere activar iluminación,
+                            // false si requiere desactivarla
+   Textura   *tex ;         // si !=NULL, el material tiene esta textura
+   VectorRGB color ;        // color del material cuando iluminacion=false
+   ColoresMat del,          // reflectividades de caras delanteras, si iluminacion=true
+              tra ;         // reflectividades de caras traseras, si iluminacion=true
 } ;
+
+// Clases de materiales para la práctica
+
+class MaterialLata : public Material {
+public:
+  MaterialLata() ;
+};
+
+class MaterialTapasLata : public Material {
+public:
+  MaterialTapasLata();
+};
+
+class MaterialPeonMadera : public Material {
+public:
+  MaterialPeonMadera();
+};
+
+class MaterialPeonBlanco : public Material {
+public:
+  MaterialPeonBlanco();
+};
+
+class MaterialPeonNegro : public Material {
+public:
+  MaterialPeonNegro();
+};
 
 //**********************************************************************
 // Clase FuenteLuz
@@ -199,13 +221,15 @@ class Material
 class FuenteLuz
 {
    public:
-
    // inicializa la fuente de luz
    //
    // p_longi_ini == valor inicial del ángulo horizontal en grados
    // p_lati_ini  == idem del ángulo vértical
    // p_color     == color de la fuente de luz (amb, dif y spec )
-   FuenteLuz( GLfloat p_longi_ini, GLfloat p_lati_ini, const VectorRGB & p_color ) ;
+   // FuenteLuz( GLfloat p_longi_ini, GLfloat p_lati_ini, const VectorRGB & p_color ) ;
+
+   // Crea una FuenteLuz
+   FuenteLuz( const VectorRGB & p_color ) ;
 
    // cambia el estado de OpenGL de forma que a partir de la llamada
    // se usará esta fuente de luz en los calculos del MIL
@@ -214,28 +238,63 @@ class FuenteLuz
 
    // cambia los atributos de la instancia en respuesta a una pulsación
    // de una tecla 'especial' (según la terminología de 'glut')
-   bool gestionarEventoTeclaEspecial( int key ) ;
+   virtual bool gestionarEventoTeclaEspecial( int key ) ;
 
    //-------------------------------------------------------------------
    // variables de instancia:
 
 public:
-    float
-      longi,      // longitud actual de la fuente direccional (en grados, entre 0 y 360)
-      lati ;      // latitud actual de la fuente direccional (en grados, entre -90 y 90)
-protected:
-   VectorRGB
-      col_ambiente,  // color de la fuente para la componente ambiental
-      col_difuso,    // color de la fuente para la componente difusa
-      col_especular; // color de la fuente para la componente especular
-   GLenum
-      ind_fuente ;// indice de la fuente de luz en el vector, se asigna al insertarlo
-   float
-      longi_ini,  // valor inicial de 'longi'
-      lati_ini ;  // valor inicial de 'lati'
+  //  float
+  //    longi,      // longitud actual de la fuente direccional (en grados, entre 0 y 360)
+  //    lati ;      // latitud actual de la fuente direccional (en grados, entre -90 y 90)
+
+  protected:
+  Tupla4f posvec;
+
+  VectorRGB
+    col_ambiente,  // color de la fuente para la componente ambiental
+    col_difuso,    // color de la fuente para la componente difusa
+    col_especular; // color de la fuente para la componente especular
+
+  GLenum
+    ind_fuente ;   // indice de la fuente de luz en el vector, se asigna al insertarlo
+
+  // float
+  //    longi_ini,  // valor inicial de 'longi'
+  //    lati_ini ;  // valor inicial de 'lati'
 
    friend class ColFuentesLuz ;
 } ;
+
+//**********************************************************************
+
+class FuenteDireccional : public FuenteLuz {
+private:
+  void ActualizarDireccion();
+protected:
+  float lati_ini, longi_ini;
+public:
+  // Alpha es latitud y beta, longitud.
+  float lati, longi;
+
+  // inicializar la fuente de luz
+  FuenteDireccional( float lati_ini, float longi_ini, const VectorRGB & p_color ) ;
+
+  // Cambiar ángulo:
+  // (angulo==0 –>variar latitud, angulo==1 –>variar longitud)
+  void variarAngulo( unsigned angulo, float incremento ) ;
+
+  bool gestionarEventoTeclaEspecial( int key ) ;
+
+  void activar() ;
+};
+
+class FuentePosicional : public FuenteLuz {
+public:
+  FuentePosicional( const Tupla3f & posicion, const VectorRGB & p_color ) ;
+
+  bool gestionarEventoTeclaEspecial( int key ) ;
+};
 
 //**********************************************************************
 // Clase ConjuntoFuentes
@@ -255,4 +314,5 @@ class ColFuentesLuz
    std::vector<FuenteLuz *> vpf ; // vector de punteros a fuentes
    GLint max_num_fuentes ;
 } ;
+
 #endif

@@ -16,7 +16,14 @@ using namespace std ;
 // *****************************************************************************
 
 MallaRevol::MallaRevol(const string &nombre_arch, const int nperfiles,
-      const bool crear_tapas, const bool cerrar_malla  ) {
+      const bool crear_tapas, const bool cerrar_malla, const bool crear_textura  ) {
+
+  // Nos aseguramos de que no intentamos crear una malla cerrada con textura
+  if (cerrar_malla && crear_textura) {
+    cerr << "\n\tABORTANDO - No se puede crear una MallaRevol cerrada con texturas" << endl;
+    cerr << "\tError generado para el archivo - " << nombre_arch << endl;
+    assert (false);
+  }
 
   ponerNombre( string("malla por revolución del perfil en '"+ nombre_arch + "'" ));
 
@@ -29,6 +36,9 @@ MallaRevol::MallaRevol(const string &nombre_arch, const int nperfiles,
   }
 
   crearMallaRevol ( perfil_original, nperfiles, crear_tapas, cerrar_malla );
+  if (crear_textura) {
+      asignarCoordenadasTextura(perfil_original, nperfiles);
+  }
 
   asignarColores();
   calcular_normales();
@@ -91,10 +101,36 @@ void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
     }
   }
 
-  cout << leerNombre() << " -- vertices -> " << vertices.size() << endl;
-  cout << leerNombre() << " -- caras -> " << caras.size() << endl;
-
+  // cout << leerNombre() << " -- vertices -> " << vertices.size() << endl;
+  // cout << leerNombre() << " -- caras -> " << caras.size() << endl;
 }
+
+// *****************************************************************************
+
+void MallaRevol::asignarCoordenadasTextura( const vector<Tupla3f> &
+        perfil_original, const int nperfiles) {
+
+  vector<double> perfil_dist (perfil_original.size(), 0);
+
+  // Creamos el vector de distancias entre el elemento j del perfil y el primero
+  double distancia;
+  for (int j=1; j<perfil_original.size(); j++) {
+    distancia = sqrt( (perfil_original[j] - perfil_original[j-1]).lengthSq() );
+    perfil_dist[j] = perfil_dist[j-1] + distancia;
+  }
+
+  // Llenamos el vector de coordenadas
+  double s_i, t_j, mayor_dist = perfil_dist[ perfil_dist.size() - 1 ];
+
+  for (int i=0; i<nperfiles; i++) {
+    s_i = (double) i / (nperfiles - 1);
+    for (int j=0; j<perfil_original.size(); j++) {
+        t_j = (double) perfil_dist[j] / mayor_dist;
+        coordenadas_textura.push_back( { s_i, t_j } );
+    }
+  }
+}
+
 
 // *****************************************************************************
 

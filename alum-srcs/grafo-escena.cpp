@@ -86,6 +86,7 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
   // guarda modelview actual
   glMatrixMode( GL_MODELVIEW );
   glPushMatrix() ;
+  cv.pilaMateriales.push();
   for( unsigned i = 0 ; i < entradas.size() ; i++ ) {
     if( entradas[i].tipo == TipoEntNGE::objeto ) {
       // si la entrada es sub-objeto, visualizarlo
@@ -94,9 +95,13 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
       // si la entrada es transformación, componerla
       glMatrixMode( GL_MODELVIEW );
       glMultMatrixf( *(entradas[i].matriz) );
+    } else if (entradas[i].tipo == TipoEntNGE::material ) {
+      // si la entrada es un material, lo activas
+      cv.pilaMateriales.activarMaterial( entradas[i].material );
     }
   }
   // restaura modelview guardada
+  cv.pilaMateriales.pop();
   glMatrixMode( GL_MODELVIEW );
   glPopMatrix();
 }
@@ -119,8 +124,7 @@ void NodoGrafoEscena::fijarColorNodo( const Tupla3f & nuevo_color ) {
 // Añadir una entrada (al final).
 // genérica
 
-unsigned NodoGrafoEscena::agregar( const EntradaNGE & entrada )
-{
+unsigned NodoGrafoEscena::agregar( const EntradaNGE & entrada ) {
    entradas.push_back( entrada );
    return entradas.size() - 1;
 }
@@ -128,16 +132,14 @@ unsigned NodoGrafoEscena::agregar( const EntradaNGE & entrada )
 // construir una entrada y añadirla (al final)
 // objeto (copia solo puntero)
 
-unsigned NodoGrafoEscena::agregar( Objeto3D * pObjeto )
-{
+unsigned NodoGrafoEscena::agregar( Objeto3D * pObjeto ) {
    return agregar( EntradaNGE( pObjeto ) );
 }
 // ---------------------------------------------------------------------
 // construir una entrada y añadirla (al final)
 // matriz (copia objeto)
 
-unsigned NodoGrafoEscena::agregar( const Matriz4f & pMatriz )
-{
+unsigned NodoGrafoEscena::agregar( const Matriz4f & pMatriz ) {
    return agregar( EntradaNGE( pMatriz ) );
 }
 // ---------------------------------------------------------------------
@@ -214,7 +216,7 @@ void NodoGrafoEscenaParam::reset() {
 // -----------------------------------------------------------------------------
 
 C::C(bool atraccion) {
-  cout << "Constructor C comienza" << endl;
+  // cout << "Constructor C comienza" << endl;
   if (atraccion) {
     agregar( new Atraccion( &parametros ) );
     nombre = "Atracción";
@@ -223,49 +225,49 @@ C::C(bool atraccion) {
     reset();
     nombre = "Araña";
   }
-  cout << "Constructor C termina" << endl;
+  // cout << "Constructor C termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Asiento::Asiento() {
-  cout << "Constructor Asiento comienza" << endl;
+  // cout << "Constructor Asiento comienza" << endl;
   agregar( MAT_Escalado(0.5,0.3,0.5) );
   agregar( new Cubo );
-  cout << "Constructor Asiento termina" << endl;
+  // cout << "Constructor Asiento termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 AsientoDelantero::AsientoDelantero(float d) {
-  cout << "Constructor AsientoDelantero comienza" << endl;
+  // cout << "Constructor AsientoDelantero comienza" << endl;
   agregar( MAT_Traslacion(0,0,d) );
   agregar( new Asiento );
-  cout << "Constructor AsientoDelantero termina" << endl;
+  // cout << "Constructor AsientoDelantero termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 AsientoTrasero::AsientoTrasero(float d) {
-  cout << "Constructor AsientoTrasero comienza" << endl;
+  // cout << "Constructor AsientoTrasero comienza" << endl;
   agregar( MAT_Traslacion(0,0,-d-0.5) );
   agregar( new Asiento );
-  cout << "Constructor AsientoTrasero termina" << endl;
+  // cout << "Constructor AsientoTrasero termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 CilindroAsientos::CilindroAsientos() {
-  cout << "Constructor CilindroAsientos comienza" << endl;
+  // cout << "Constructor CilindroAsientos comienza" << endl;
   agregar( MAT_Rotacion(270,0,0,1) );
   agregar( new Cilindro(10,30,true,true,10,1) );
-  cout << "Constructor CilindroAsientos termina" << endl;
+  // cout << "Constructor CilindroAsientos termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 FinalBrazoMecanico::FinalBrazoMecanico(vector<Parametro> *v, float d, int num) {
-  cout << "Constructor FinalBrazoMecanico comienza" << endl;
+  // cout << "Constructor FinalBrazoMecanico comienza" << endl;
   agregar( MAT_Rotacion(0,0,0,1) ); // Matriz del parámetro
   agregar( MAT_Rotacion(0,1,0,0) ); // Matriz del parámetro
   agregar( MAT_Traslacion(d,0,0) );
@@ -291,13 +293,13 @@ FinalBrazoMecanico::FinalBrazoMecanico(vector<Parametro> *v, float d, int num) {
                 [=](float ang) {return MAT_Rotacion (ang,1,0,0);},
                 true, 0, 45, 0.1) );
 
-  cout << "Constructor FinalBrazoMecanico termina" << endl;
+  // cout << "Constructor FinalBrazoMecanico termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 BrazoMecanico::BrazoMecanico(vector<Parametro> *v, float d, int num) {
-  cout << "Constructor BrazoMecanico comienza" << endl;
+  // cout << "Constructor BrazoMecanico comienza" << endl;
   agregar( MAT_Rotacion(0,0,0,1) ); // Matriz del parámetro
   agregar( MAT_Traslacion(d,0,0) );
   agregar( new CilindroAsientos );
@@ -311,13 +313,13 @@ BrazoMecanico::BrazoMecanico(vector<Parametro> *v, float d, int num) {
   v->push_back( Parametro (ss.str(), entradas[0].matriz,
                 [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
                 true, 0, 22.5, 0.1) );
-  cout << "Constructor BrazoMecanico termina" << endl;
+  // cout << "Constructor BrazoMecanico termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 BaseBrazos::BaseBrazos(vector<Parametro> *v) {
-  cout << "Constructor BaseBrazos comienza" << endl;
+  // cout << "Constructor BaseBrazos comienza" << endl;
   agregar ( MAT_Rotacion(0,0,1,0) ); // MAT parametro
   for (int i=0; i<4; i++) {
     agregar( new BrazoMecanico(v, 1, i+1) );
@@ -330,13 +332,13 @@ BaseBrazos::BaseBrazos(vector<Parametro> *v) {
                 entradas[0].matriz,
                 [=](float ang) {return MAT_Rotacion (ang,0,1,0);},
                 false, 180, 50, 2) );
-  cout << "Constructor BaseBrazos termina" << endl;
+  // cout << "Constructor BaseBrazos termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Atraccion::Atraccion(vector<Parametro> *v) {
-  cout << "Constructor Atraccion comienza" << endl;
+  // cout << "Constructor Atraccion comienza" << endl;
 
   agregar( MAT_Escalado(0.1,0.1,0.1) );
   agregar( MAT_Traslacion(0,26.8,0) );
@@ -359,48 +361,48 @@ Atraccion::Atraccion(vector<Parametro> *v) {
                 [=](float ang) {return MAT_Rotacion (ang,1,0,0);},
                 true, 0, 45, 0.1) );
 
-  cout << "Constructor BaseBrazos termina" << endl;
+  // cout << "Constructor BaseBrazos termina" << endl;
 }
 // -----------------------------------------------------------------------------
 
 Ojo::Ojo(float ang) {
-  cout << "Constructor Ojo comienza" << endl;
+  // cout << "Constructor Ojo comienza" << endl;
   agregar( MAT_Rotacion(ang, 0, 1, 0) );
   agregar( MAT_Rotacion(30, 0, 0, 1) );
   agregar( MAT_Traslacion(1, 0, 0) );
   agregar( new Esfera(20,50,false,false,0.1) );
   Tupla3f c = {1,0,0};
   fijarColorNodo( c );
-  cout << "Constructor Ojo termina" << endl;
+  // cout << "Constructor Ojo termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Pata::Pata(vector<Parametro> *v, int num) {
-  cout << "Constructor Pata comienza" << endl;
+  // cout << "Constructor Pata comienza" << endl;
   float e = 0.05;
   agregar( MAT_Traslacion(1-e, 0 ,0) );
   agregar( MAT_Escalado(e, e, e) );
   agregar( new BrazoMecanico(v, 1, num) );
   Tupla3f c = {0.2,0.2,0.2};
   fijarColorNodo( c );
-  cout << "Constructor Pata termina" << endl;
+  // cout << "Constructor Pata termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ParDePatas::ParDePatas(vector<Parametro> *v, int num) {
-  cout << "Constructor ParDePatas comienza" << endl;
+  // cout << "Constructor ParDePatas comienza" << endl;
   agregar( new Pata(v, num) );
   agregar( MAT_Rotacion(180, 0, 0, 1) );
   agregar( new Pata(v, num+1) );
-  cout << "Constructor ParDePatas termina" << endl;
+  // cout << "Constructor ParDePatas termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Cuerpo::Cuerpo(vector<Parametro> *v) {
-  cout << "Constructor Cuerpo comienza" << endl;
+  // cout << "Constructor Cuerpo comienza" << endl;
   agregar( MAT_Rotacion(0,0,1,0) ); // MAT parametro
   for (int i=0; i<4; i++) {
     agregar( MAT_Rotacion(30, 0, 1, 0) );
@@ -420,13 +422,13 @@ Cuerpo::Cuerpo(vector<Parametro> *v) {
                 [=](float ang) {return MAT_Rotacion (ang,0,1,0);},
                 false, 180, 50, 2) );
 
-  cout << "Constructor Cuerpo termina" << endl;
+  // cout << "Constructor Cuerpo termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Colgante::Colgante(vector<Parametro> *v) {
-  cout << "Constructor Colgante comienza" << endl;
+  // cout << "Constructor Colgante comienza" << endl;
   //agregar( MAT_Escalado(0.1,0.1,0.1) );
   agregar( MAT_Traslacion(0,25.8 + 0.3,0) );
   agregar( MAT_Rotacion(0,0,1,0) ); // MAT del parametro
@@ -451,13 +453,13 @@ Colgante::Colgante(vector<Parametro> *v) {
   Tupla3f c = {1,1,1};
   fijarColorNodo( c );
 
-  cout << "Constructor Colgante termina" << endl;
+  // cout << "Constructor Colgante termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Brazo::Brazo(Tupla3f color) {
-  cout << "Constructor Brazo comienza" << endl;
+  // cout << "Constructor Brazo comienza" << endl;
   agregar( MAT_Rotacion(90, 0, 0, 1) );
   agregar( new Esfera(20,50,false,false,1) );
   agregar( MAT_Traslacion(0, 1, 0) );
@@ -466,13 +468,13 @@ Brazo::Brazo(Tupla3f color) {
   agregar( new Esfera(20,50,false,false,1) );
 
   fijarColorNodo(color);
-  cout << "Constructor Brazo termina" << endl;
+  // cout << "Constructor Brazo termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 BrazoOrientado::BrazoOrientado(vector<Parametro> *v, float ang, Tupla3f color) {
-  cout << "Constructor BrazoOrientado comienza" << endl;
+  // cout << "Constructor BrazoOrientado comienza" << endl;
   agregar( MAT_Rotacion(0, 0, 0, 1) ); // MAT param
   agregar( MAT_Rotacion(ang, 0, 0, 1) );
   agregar( new Brazo(color) );
@@ -483,13 +485,13 @@ BrazoOrientado::BrazoOrientado(vector<Parametro> *v, float ang, Tupla3f color) {
                 [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
                 true, 0, 45, 0.1) );
 
-  cout << "Constructor BrazoOrientado termina" << endl;
+  // cout << "Constructor BrazoOrientado termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Tronco::Tronco(std::vector<Parametro> *v) {
-  cout << "Constructor Tronco comienza" << endl;
+  // cout << "Constructor Tronco comienza" << endl;
   agregar( MAT_Rotacion(0, 0, 0, 1) ); // MAT param
   agregar( new Brazo(Tupla3f(1,0,0)) );
   agregar( MAT_Traslacion(-5, 0, 0) );
@@ -501,16 +503,16 @@ Tronco::Tronco(std::vector<Parametro> *v) {
                 [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
                 true, 0, 45, 0.1) );
 
-  cout << "Constructor Tronco termina" << endl;
+  // cout << "Constructor Tronco termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 C2::C2() {
-  cout << "Constructor C2 comienza" << endl;
+  // cout << "Constructor C2 comienza" << endl;
   agregar( new Tronco( &parametros ) );
   nombre = "Tronco";
-  cout << "Constructor C2 termina" << endl;
+  // cout << "Constructor C2 termina" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -518,3 +520,40 @@ C2::C2() {
 C::C() { }
 
 // -----------------------------------------------------------------------------
+
+C4::C4() {
+  ponerNombre( "Clase práctica 4" );
+  agregar( new PeonP4(0) );
+  agregar( MAT_Rotacion(-45,0,1,0) );
+  agregar( new PeonP4(1) );
+  agregar( MAT_Rotacion(-45,0,1,0) );
+  agregar( new PeonP4(2) );
+}
+
+// -----------------------------------------------------------------------------
+
+// 0 = Madera, 1 = Blanco, 2 = Negro
+PeonP4::PeonP4(int tipo) {
+  agregar( MAT_Traslacion(Tupla3f{5.0,0.0,0.0}) );
+  string nombre = "Peon ";
+  switch (tipo) {
+    case 0:
+      agregar( new MaterialPeonMadera()  );
+      nombre += "de madera";
+      break;
+    case 1:
+      agregar( new MaterialPeonBlanco()  );
+      nombre += "blanco";
+      break;
+    case 2:
+      agregar( new MaterialPeonNegro()  );
+      nombre += "negro";
+      break;
+    default:
+      cerr << "\tABORTANDO - Intentando crear peón de tipo desconocido" << endl;
+      assert(false);
+  }
+  ponerNombre( nombre );
+  agregar( new MallaRevol("../plys/peon.ply", 30, 1, 0, 1) );
+  cout << "Creado: " << nombre << endl;
+}
