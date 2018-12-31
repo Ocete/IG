@@ -138,8 +138,7 @@ class TexturaXY : public Textura
 // clase que encapsula los atributos de un material, incluyendo la
 // textura del mismo.
 
-class Material
-{
+class Material {
    public:
 
    // crea un material con un color plano blanco sin textura
@@ -234,11 +233,11 @@ class FuenteLuz
    // cambia el estado de OpenGL de forma que a partir de la llamada
    // se usará esta fuente de luz en los calculos del MIL
    // (en cada momento puede haber varias fuentes activadas)
-   void activar() ;
+   virtual void activar() = 0 ;
 
    // cambia los atributos de la instancia en respuesta a una pulsación
    // de una tecla 'especial' (según la terminología de 'glut')
-   virtual bool gestionarEventoTeclaEspecial( int key ) ;
+   virtual bool gestionarEventoTeclaEspecial( int key ) = 0;
 
    //-------------------------------------------------------------------
    // variables de instancia:
@@ -292,7 +291,7 @@ public:
 class FuentePosicional : public FuenteLuz {
 public:
   FuentePosicional( const Tupla3f & posicion, const VectorRGB & p_color ) ;
-
+  void activar() ;
   bool gestionarEventoTeclaEspecial( int key ) ;
 };
 

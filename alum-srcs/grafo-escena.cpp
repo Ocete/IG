@@ -555,5 +555,5 @@ PeonP4::PeonP4(int tipo) {
   }
   ponerNombre( nombre );
   agregar( new MallaRevol("../plys/peon.ply", 30, 1, 0, 1) );
-  cout << "Creado: " << nombre << endl;
+  // cout << "Creado: " << nombre << endl;
 }

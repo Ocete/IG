@@ -47,7 +47,7 @@ void MallaInd::calcular_normales() {
     for (int i=0; i<caras.size(); i++) {
       a = vertices[ caras[i](1) ] - vertices[ caras[i](0) ];
       b = vertices[ caras[i](2) ] - vertices[ caras[i](0) ];
-      b = b.cross(a);
+      b = a.cross(b);
       // Normalizamos si no es 0
       if (b(0) != 0 || b(1) != 0 || b(2) != 0) {
         normales_caras.push_back( b.normalized() );
@@ -186,15 +186,15 @@ void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
   }
   glEnd();*/
 
-  glVertexPointer(3,GL_FLOAT,0,vertices.data());
-  glTexCoordPointer(2,GL_FLOAT,0,coordenadas_textura.data());
-  glNormalPointer(GL_FLOAT,0,normales_vertices.data());
-
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  glDrawElements(GL_TRIANGLES,3*caras.size(),GL_UNSIGNED_INT,caras.data());
+  glVertexPointer(3, GL_FLOAT, 0, vertices.data());
+  glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
+  glNormalPointer(GL_FLOAT, 0, normales_vertices.data());
+
+  glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
@@ -410,8 +410,6 @@ void MallaInd::PolygonMode ( ContextoVis & cv ) {
 
 void MallaInd::visualizarGL( ContextoVis & cv ) {
   PolygonMode( cv );
-
-  glShadeModel( GL_SMOOTH );
 
   if (cv.usarVBOs) {
     if (!vbo_creado) {

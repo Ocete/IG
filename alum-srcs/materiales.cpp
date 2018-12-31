@@ -72,29 +72,26 @@ void PilaMateriales::pop(  ) {
 Textura::Textura( const std::string & nombreArchivoJPG ) {
    imagen = new jpg::Imagen( nombreArchivoJPG );
    enviada = false;
-   ident_textura = -1;
+   glGenTextures( 1, &ident_textura );
    modo_gen_ct = mgct_desactivada;
 }
 
 // ---------------------------------------------------------------------
 
 void Textura::enviar() {
-  if ( ident_textura != -1 ) {
+  if ( enviada ) {
     cerr << "\tABORTANDO - intentando enviar textura ya enviada" << endl;
     assert(false);
   }
 
   // Configuramos las coordenadas de textura antes de enviarla
-  if (modo_gen_ct == mgct_coords_objeto) {
+  if ( modo_gen_ct == mgct_coords_objeto ) {
     glTexGenfv ( GL_S, GL_OBJECT_PLANE, coefs_s );
     glTexGenfv ( GL_T, GL_OBJECT_PLANE, coefs_t );
-  } else if (modo_gen_ct == mgct_coords_ojo) {
+  } else if ( modo_gen_ct == mgct_coords_ojo ) {
     glTexGenfv ( GL_S, GL_EYE_PLANE, coefs_s );
     glTexGenfv ( GL_T, GL_EYE_PLANE, coefs_t );
   }
-
-  // Obtenemos identificador de textura
-  glGenTextures( 1, &ident_textura );
 
   // Activación y envío
   glBindTexture( GL_TEXTURE_2D, ident_textura );
@@ -102,8 +99,10 @@ void Textura::enviar() {
       GL_RGB, GL_UNSIGNED_BYTE, imagen->leerPixels() );
 
   // Configuramos la textura
-  glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  // glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR );
+  // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+  enviada = true;
 }
 
 //----------------------------------------------------------------------
@@ -125,7 +124,6 @@ void Textura::activar(  ) {
   glEnable( GL_TEXTURE_2D );
   if ( !enviada ) {
    enviar();
-   enviada = true;
   }
   glBindTexture( GL_TEXTURE_2D, ident_textura );
 
@@ -141,7 +139,7 @@ void Textura::activar(  ) {
       glTexGeni(GL_T,GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
     } else {
        glTexGeni(GL_S,GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-      glTexGeni(GL_T,GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+       glTexGeni(GL_T,GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
     }
   }
 }
@@ -182,7 +180,7 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
       :  Material() {
    tex = text;
    iluminacion = true;
-   color = VectorRGB(0.0,0.0,0.0,1.0);
+   coloresCero();
 
    del.emision   = VectorRGB(0.0,0.0,0.0, 1.0);
    del.ambiente  = VectorRGB(ka, ka, ka, 1.0);
@@ -206,17 +204,22 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
 Material::Material( const Tupla3f & colorAmbDif, float ka, float kd, float ks,
         float exp ) : Material (NULL, ka, kd, ks, exp) {
 
-  color = VectorRGB(colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 1.0);
+  coloresCero();
+  glColor3fv(colorAmbDif); //
+  glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+
+  //color = VectorRGB(colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 0.0);
   ponerNombre("material color plano, ilum.") ;
 }
 // ---------------------------------------------------------------------
 
 // crea un material con un color plano sin textura ni iluminación
 Material::Material( const float r, const float g, const float b ) {
-  coloresCero();
   tex = NULL;
   iluminacion = false;
+  coloresCero();
   color = VectorRGB(r,g,b, 1.0);
+  ponerNombre("material con color plano, sin iluminación");
 }
 
 //----------------------------------------------------------------------
@@ -264,7 +267,7 @@ std::string Material::nombre() const {
 //----------------------------------------------------------------------
 
 void Material::activar(  ) {
-  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, color ) ;
+  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, Tupla4f {1,1,1,1} ) ;
 
   if (tex != NULL) {
     tex->activar();
@@ -272,26 +275,30 @@ void Material::activar(  ) {
     glDisable( GL_TEXTURE_2D );
   }
 
-  if (iluminacion) {
-    glEnable (GL_LIGHTING);
+  if ( iluminacion ) {
 
-    glMaterialfv( GL_FRONT, GL_AMBIENT, del.emision ) ;
+    glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
     glMaterialfv( GL_FRONT, GL_AMBIENT, del.ambiente ) ;
     glMaterialfv( GL_FRONT, GL_DIFFUSE, del.difusa ) ;
     glMaterialfv( GL_FRONT, GL_SPECULAR, del.especular ) ;
     glMaterialf( GL_FRONT, GL_SHININESS, del.exp_brillo ) ;
 
-    glMaterialfv( GL_BACK, GL_AMBIENT, tra.emision ) ;
+    glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
     glMaterialfv( GL_BACK, GL_AMBIENT, tra.ambiente ) ;
     glMaterialfv( GL_BACK, GL_DIFFUSE, tra.difusa ) ;
     glMaterialfv( GL_BACK, GL_SPECULAR, tra.especular ) ;
     glMaterialf( GL_BACK, GL_SHININESS, tra.exp_brillo ) ;
+
+    glEnable (GL_LIGHTING);
+
   } else {
     glDisable( GL_LIGHTING );
     glColor4fv( color );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+
+    glEnable( GL_COLOR_MATERIAL );
   }
 }
 
@@ -374,27 +381,26 @@ FuenteLuz::FuenteLuz( const VectorRGB & p_color ) {
 
 //----------------------------------------------------------------------
 
-// Para la fuente POSICIONAL
-void FuenteLuz::activar() {
+void FuentePosicional::activar() {
    if (ind_fuente == -1) {
-     cerr << "ABORTANDO - intentando activar una fuente con indice -1" << endl;
+     cerr << "ABORTANDO - intentando activar una fuente posicional con indice -1" << endl;
      assert (false);
    }
 
    glEnable (GL_LIGHT0 + ind_fuente);
-   glLightfv (GL_LIGHT0 + ind_fuente, GL_POSITION, posvec );
    glLightfv (GL_LIGHT0 + ind_fuente, GL_AMBIENT, col_ambiente);
    glLightfv (GL_LIGHT0 + ind_fuente, GL_DIFFUSE, col_difuso);
    glLightfv (GL_LIGHT0 + ind_fuente, GL_SPECULAR, col_especular);
+   glLightfv (GL_LIGHT0 + ind_fuente, GL_POSITION, posvec );
 }
 
 //----------------------------------------------------------------------
-
+/*
 // Si hago esta función abstract (como debería ser)
 // aparecen una serie de errores que no se resolver
 bool FuenteLuz::gestionarEventoTeclaEspecial( int key ) {
     return false;
-}
+}*/
 
 //**********************************************************************
 
@@ -404,26 +410,24 @@ FuenteDireccional::FuenteDireccional(float alpha_inicial, float beta_inicial,
     this->longi_ini = longi_ini;
     lati = lati_ini;
     longi = longi_ini;
-    ActualizarDireccion();
 }
 
 //----------------------------------------------------------------------
 
 void FuenteDireccional::activar() {
-   if (ind_fuente == -1) {
-     cerr << "ABORTANDO - intentando activar una fuente direccional con indice -1" << endl;
-     assert (false);
-   }
+  if (ind_fuente == -1) {
+   assert (false);
+  }
 
-   // Habilitamos la fuente
-    glEnable(GL_LIGHT0+ind_fuente);
+  // Habilitamos la fuente
+  glEnable(GL_LIGHT0+ind_fuente);
 
-    // Colores de ambiente
-    glLightfv( GL_LIGHT0 + ind_fuente, GL_AMBIENT, col_ambiente );
-    glLightfv( GL_LIGHT0 + ind_fuente, GL_DIFFUSE, col_difuso );
-    glLightfv( GL_LIGHT0 + ind_fuente, GL_SPECULAR, col_especular );
+  // Colores de ambiente
+  glLightfv( GL_LIGHT0 + ind_fuente, GL_AMBIENT, col_ambiente );
+  glLightfv( GL_LIGHT0 + ind_fuente, GL_DIFFUSE, col_difuso );
+  glLightfv( GL_LIGHT0 + ind_fuente, GL_SPECULAR, col_especular );
 
-    ActualizarDireccion();
+  ActualizarDireccion();
 }
 
 //----------------------------------------------------------------------
@@ -480,12 +484,12 @@ void FuenteDireccional::ActualizarDireccion() {
   glMatrixMode (GL_MODELVIEW );
   glPushMatrix() ;
   glLoadIdentity();
-  glRotatef (lati, 0.0, 1.0, 0.0);
-  glRotatef (longi, -1.0, 0.0, 0.0 );
+  glRotatef (longi, 0.0, 1.0, 0.0);
+  glRotatef (lati, -1.0, 0.0, 0.0 );
 
   glLightfv (GL_LIGHT0 + ind_fuente, GL_POSITION, ejeZ);
   // Dudo que esto vaya a funcionar
-  posvec = ejeZ;
+  //posvec = ejeZ;
 
   glPopMatrix();
 }
@@ -500,7 +504,7 @@ FuentePosicional::FuentePosicional ( const Tupla3f & posicion,
 //----------------------------------------------------------------------
 
 bool FuentePosicional::gestionarEventoTeclaEspecial( int key ) {
-  cout << "Las fuentes posicionales no gestionan fuentes de luz" << endl;
+  cout << "Las fuentes posicionales no gestionan teclas" << endl;
   return false;
 }
 
