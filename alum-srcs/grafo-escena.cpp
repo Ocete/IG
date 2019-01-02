@@ -554,6 +554,7 @@ PeonP4::PeonP4(int tipo) {
       assert(false);
   }
   ponerNombre( nombre );
-  agregar( new MallaRevol("../plys/peon.ply", 30, 1, 0, 1) );
+  bool textura = tipo == 0;
+  agregar( new MallaRevol("../plys/peon.ply", 3, 1, 0, textura) );
   // cout << "Creado: " << nombre << endl;
 }

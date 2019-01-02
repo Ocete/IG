@@ -123,6 +123,8 @@ void MallaInd::visualizarDE_MI_DrawArrays( ContextoVis & cv ) {
 // -----------------------------------------------------------------------------
 
 void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
+  glEnable( GL_SMOOTH );
+
   // Si hay colores, habilitar punteros a colores y establecer direccion y
   // estructura de estos
   if (colores.size() > 0) {
@@ -166,39 +168,42 @@ void MallaInd::visualizarDE_MI_SombreadoSuave( ContextoVis & cv ) {
 // -----------------------------------------------------------------------------
 
 void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
-  //glBegin( GL_TRIANGLES );
   int index;
-  /*if (coordenadas_textura.size() == 0) {
-    glColor3fv( Tupla3f{0.7,0,0.7} );
-  }
 
+  glBegin( GL_TRIANGLES );
   for ( unsigned i=0; i<caras.size(); i++ ) {
     for( unsigned j=0 ; j<3 ; j++ ) {
       index = caras[i](j);
       if ( coordenadas_textura.size() > 0 ) {
         glTexCoord2fv( coordenadas_textura[ index ] );
       }
-      if ( normales_vertices.size() > 0 ) {
+      /*if ( normales_vertices.size() > 0 ) {
         glNormal3fv( normales_vertices[ index ] );
-      }
+      }*/
       glVertex3fv( vertices[ index ] );
     }
   }
-  glEnd();*/
+  glEnd();
+
+  std::cout << "sombreado: " << coordenadas_textura.size() << std::endl;
+  /*if (coordenadas_textura.size() > 0) {
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
+  }
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
   glVertexPointer(3, GL_FLOAT, 0, vertices.data());
-  glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
   glNormalPointer(GL_FLOAT, 0, normales_vertices.data());
+
+  //glColor3fv ( Tupla3f{0.3,0.3,0.3} );
 
   glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);*/
 }
 
 // -----------------------------------------------------------------------------
@@ -250,22 +255,22 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
 
   switch (cv.modoVis) {
     case modoExamen:
-      glDisable( GL_LIGHTING );
+      //glDisable( GL_LIGHTING );
       glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawExamen(cv);
       break;
     case modoSombreadoPlano:
-      glEnable( GL_LIGHTING );
-      glEnable( GL_TEXTURE_2D );
+      //glEnable( GL_LIGHTING );
+      //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoPlano(cv);
       break;
     case modoSombreadoSuave:
-      glEnable( GL_LIGHTING );
-      glEnable( GL_TEXTURE_2D );
+      //glEnable( GL_LIGHTING );
+      //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
       break;
     default:
-      glDisable( GL_LIGHTING );
+      //glDisable( GL_LIGHTING );
       glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawElements(cv);
       // visualizarDE_MI_Vertex(cv);
