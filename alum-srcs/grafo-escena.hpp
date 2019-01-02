@@ -269,12 +269,43 @@ public:
 
 //**********************************************************************
 
-class PeonP4 : public NodoGrafoEscenaParam {
+class PeonP4 : public NodoGrafoEscena {
   std::string nombre;
 public:
   // 0 = Madera, 1 = Blanco, 2 = Negro
   PeonP4(int tipo);
 } ;
 
+//**********************************************************************
+
+class Lata : public NodoGrafoEscena {
+  std::string nombre;
+public:
+  Lata();
+} ;
+
+//**********************************************************************
+
+class TapaSuperiorLata : public NodoGrafoEscena {
+  std::string nombre;
+public:
+  TapaSuperiorLata();
+} ;
+
+//**********************************************************************
+
+class TapaInferiorLata : public NodoGrafoEscena {
+  std::string nombre;
+public:
+  TapaInferiorLata();
+} ;
+
+//**********************************************************************
+
+class CuerpoLata : public NodoGrafoEscena {
+  std::string nombre;
+public:
+  CuerpoLata();
+} ;
 
 #endif // GRAFO_ESCENA_HPP

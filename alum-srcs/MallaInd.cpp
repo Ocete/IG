@@ -170,23 +170,23 @@ void MallaInd::visualizarDE_MI_SombreadoSuave( ContextoVis & cv ) {
 void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
   int index;
 
-  glBegin( GL_TRIANGLES );
+  /*glBegin( GL_TRIANGLES );
   for ( unsigned i=0; i<caras.size(); i++ ) {
     for( unsigned j=0 ; j<3 ; j++ ) {
       index = caras[i](j);
       if ( coordenadas_textura.size() > 0 ) {
         glTexCoord2fv( coordenadas_textura[ index ] );
       }
-      /*if ( normales_vertices.size() > 0 ) {
+      if ( normales_vertices.size() > 0 ) {
         glNormal3fv( normales_vertices[ index ] );
-      }*/
+      }
       glVertex3fv( vertices[ index ] );
     }
   }
-  glEnd();
+  glEnd();*/
 
   std::cout << "sombreado: " << coordenadas_textura.size() << std::endl;
-  /*if (coordenadas_textura.size() > 0) {
+  if (coordenadas_textura.size() > 0) {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
   }
@@ -203,7 +203,7 @@ void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);*/
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 // -----------------------------------------------------------------------------
@@ -261,12 +261,12 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       break;
     case modoSombreadoPlano:
       //glEnable( GL_LIGHTING );
-      //glEnable( GL_TEXTURE_2D );
+      glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoPlano(cv);
       break;
     case modoSombreadoSuave:
-      //glEnable( GL_LIGHTING );
-      //glEnable( GL_TEXTURE_2D );
+      glEnable( GL_LIGHTING );
+      glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
       break;
     default:

@@ -84,9 +84,6 @@ void Textura::enviar() {
     assert(false);
   }
 
-  // Activación
-  glBindTexture( GL_TEXTURE_2D, ident_textura );
-
   // Configuramos las coordenadas de textura antes de enviarla
   if ( modo_gen_ct == mgct_coords_objeto ) {
     glTexGenfv ( GL_S, GL_OBJECT_PLANE, coefs_s );
@@ -96,7 +93,8 @@ void Textura::enviar() {
     glTexGenfv ( GL_T, GL_EYE_PLANE, coefs_t );
   }
 
-  // Envío
+  // Activación y envío
+  glBindTexture( GL_TEXTURE_2D, ident_textura );
   gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, imagen->tamX(), imagen->tamY(),
       GL_RGB, GL_UNSIGNED_BYTE, imagen->leerPixels() );
 
@@ -129,7 +127,7 @@ void Textura::activar(  ) {
   glBindTexture( GL_TEXTURE_2D, ident_textura );
 
   // Esto no se si hace falta
-  if(modo_gen_ct==mgct_desactivada){
+  if(modo_gen_ct == mgct_desactivada){
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
   } else {
@@ -280,39 +278,42 @@ void Material::activar(  ) {
   if (tex != NULL) {
     tex->activar();
   } else {
+    cout << "Fijando color para " << nombre() << endl;
     glDisable( GL_TEXTURE_2D );
+    glDisable( GL_COLOR_MATERIAL );
     glColor4fv(color);
   }
 
   if ( iluminacion ) {
     cout << "Activada la iluminacion" << endl;
-    glEnable (GL_LIGHTING);
 
-    // cout << "Activando material: " << nombre() << endl;
-    // cout << del.ambiente << del.difusa << endl;
-    // cout << del.especular << del.exp_brillo << endl;
-    // cout << tra.ambiente << tra.difusa << endl;
-    // cout << tra.especular << tra.exp_brillo << endl;
+     cout << "Activando material: " << nombre() << endl;
+     cout << del.ambiente << del.difusa << endl;
+     cout << del.especular << del.exp_brillo << endl;
+     cout << tra.ambiente << tra.difusa << endl;
+     cout << tra.especular << tra.exp_brillo << endl;
 
-    //glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
+    glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
     glMaterialfv( GL_FRONT, GL_AMBIENT, del.ambiente ) ;
     glMaterialfv( GL_FRONT, GL_DIFFUSE, del.difusa ) ;
     glMaterialfv( GL_FRONT, GL_SPECULAR, del.especular ) ;
     glMaterialf( GL_FRONT, GL_SHININESS, del.exp_brillo ) ;
 
-    //glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
+    glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
     glMaterialfv( GL_BACK, GL_AMBIENT, tra.ambiente ) ;
     glMaterialfv( GL_BACK, GL_DIFFUSE, tra.difusa ) ;
     glMaterialfv( GL_BACK, GL_SPECULAR, tra.especular ) ;
     glMaterialf( GL_BACK, GL_SHININESS, tra.exp_brillo ) ;
 
+    glEnable (GL_LIGHTING);
+
   } else {
     cout << "Desactivada la iluminacion" << endl;
     glDisable( GL_LIGHTING );
     glColor4fv( color );
-    glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
-    glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
-    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 
     //glEnable( GL_COLOR_MATERIAL );
   }
@@ -320,14 +321,16 @@ void Material::activar(  ) {
 
 //----------------------------------------------------------------------
 
-MaterialLata::MaterialLata() {
-
+MaterialLata::MaterialLata()
+    : Material (new Textura("../imgs/lata-coke.jpg"),0.5,1,1,1) {
+  ponerNombre( "MaterialLata" );
 }
 
 //----------------------------------------------------------------------
 
-MaterialTapasLata::MaterialTapasLata() {
-
+MaterialTapasLata::MaterialTapasLata()
+    : Material( Tupla3f{0.3,0.3,0.3}, 1, 1, 1, 1) {
+  ponerNombre( "MaterialTapasLata" );
 }
 
 //----------------------------------------------------------------------
@@ -335,8 +338,8 @@ MaterialTapasLata::MaterialTapasLata() {
 MaterialPeonMadera::MaterialPeonMadera()
     : Material (new Textura("../imgs/text-madera.jpg"),0.5,1,1,1) {
   ponerNombre( "MaterialMadera" );
-  //del.emision = Tupla4f{0,0,0,1.0};
-  //tra.emision = Tupla4f{0,0,0,1.0};
+  del.emision = Tupla4f{0,0,0,1.0};
+  tra.emision = Tupla4f{0,0,0,1.0};
 }
 
 //----------------------------------------------------------------------
@@ -344,8 +347,8 @@ MaterialPeonMadera::MaterialPeonMadera()
 MaterialPeonBlanco::MaterialPeonBlanco()
     : Material( Tupla3f{1,1,1}, 1, 1, 0, 0) {
   ponerNombre( "MaterialBlanco" );
-  //del.emision = Tupla4f{0,0,0,1.0};
-  //tra.emision = Tupla4f{0,0,0,1.0};
+  del.emision = Tupla4f{0,0,0,1.0};
+  tra.emision = Tupla4f{0,0,0,1.0};
 }
 
 //----------------------------------------------------------------------
@@ -353,8 +356,8 @@ MaterialPeonBlanco::MaterialPeonBlanco()
 MaterialPeonNegro::MaterialPeonNegro()
     : Material( Tupla3f{0,0,0}, 1, 0.2, 1, 2) {
   ponerNombre( "MaterialNegro" );
-  //del.emision = Tupla4f{0.0,0.0,0.0,1.0};
-  //tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
+  del.emision = Tupla4f{0.0,0.0,0.0,1.0};
+  tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
 }
 
 //**********************************************************************

@@ -528,6 +528,9 @@ C4::C4() {
   agregar( new PeonP4(1) );
   agregar( MAT_Rotacion(-45,0,1,0) );
   agregar( new PeonP4(2) );
+  agregar( MAT_Escalado(4,4,4) );
+  agregar( MAT_Traslacion(0,-0.5,0) );
+  agregar( new Lata() );
 }
 
 // -----------------------------------------------------------------------------
@@ -557,4 +560,33 @@ PeonP4::PeonP4(int tipo) {
   bool textura = tipo == 0;
   agregar( new MallaRevol("../plys/peon.ply", 3, 1, 0, textura) );
   // cout << "Creado: " << nombre << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+Lata::Lata () {
+  agregar( new TapaSuperiorLata() );
+  agregar( new TapaInferiorLata() );
+  agregar( new CuerpoLata() );
+}
+
+// -----------------------------------------------------------------------------
+
+TapaSuperiorLata::TapaSuperiorLata () {
+  agregar( new MallaRevol("../plys/lata-psup.ply", 30, 1, 0, 0) );
+  agregar( new MaterialTapasLata() );
+}
+
+// -----------------------------------------------------------------------------
+
+TapaInferiorLata::TapaInferiorLata () {
+  agregar( new MaterialTapasLata() );
+  agregar( new MallaRevol("../plys/lata-pinf.ply", 30, 1, 0, 0) );
+}
+
+// -----------------------------------------------------------------------------
+
+CuerpoLata::CuerpoLata () {
+  agregar( new MaterialLata() );
+  agregar( new MallaRevol("../plys/lata-pcue.ply", 30, 1, 0, 1) );
 }
