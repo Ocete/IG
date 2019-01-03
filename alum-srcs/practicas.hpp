@@ -12,6 +12,7 @@
 #include "materiales.hpp"
 #include "cauce.hpp"
 #include "Parametro.hpp"
+#include "CamaraInter.hpp"
 
 // --------------------------------------------------------------------
 // declaraciones adelantadas de clases (útiles para punteros)
@@ -70,6 +71,9 @@ class ContextoVis
    PilaMateriales pilaMateriales ;   // pila de materiales
    ColFuentesLuz * colFuentes ;      // colección de fuentes de luz activa
 
+   // Contiene todos los parametros para la cámara (práctica 5)
+   ParTransf * PT;
+
    ContextoVis()
    {
       modoVis          = modoAlambre ;  // poner alambre por defecto
@@ -79,6 +83,7 @@ class ContextoVis
       modoSeleccionRB  = false ;
       modoSeleccionFBO = false ;
       colFuentes       = nullptr ;
+      PT               = nullptr ;
    }
 
 };

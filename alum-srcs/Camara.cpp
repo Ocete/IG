@@ -25,8 +25,6 @@
 #include "aux.hpp"
 #include "Camara.hpp"
 
-const float epsilon = 1e-6 ;
-
 // ---------------------------------------------------------------------
 // funciones auxiliares para generar matrices:
 
@@ -116,7 +114,6 @@ ViewFrustum::ViewFrustum( float hfovy_grad, float aspect, float zNear, float zFa
    matrizProy = MAT_Frustum( left, right, bottom, top, near, far );
 }
 
-
 // *********************************************************************
 // clase: Camara
 // ---------------------------------------------------------------------
@@ -126,7 +123,6 @@ Camara::Camara()
 {
 
 }
-
 
 // ---------------------------------------------------------------------
 // fijar matrices {\ttbf MODELVIEW} y {\ttbf PROJECTION} de OpenGL
@@ -143,13 +139,8 @@ void Camara::activar()
    glMultMatrixf( mcv.matrizVista ); // matriz de vista
 }
 
-
-
-
 // *********************************************************************
 // clase: Viewport
-
-
 
 // ---------------------------------------------------------------------
 // crea viewport de 512 x 512 con origen en (0,0)

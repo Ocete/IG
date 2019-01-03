@@ -239,7 +239,6 @@ Material::Material( const float r, const float g, const float b ) {
 
 void Material::coloresCero() {
    const VectorRGB ceroRGBopaco(0.0,0.0,0.0,1.0);
-   cout << "Llamada a coloresCero " << endl;
    color         =
 
    del.emision   =

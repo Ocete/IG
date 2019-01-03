@@ -24,14 +24,21 @@ Viewport viewport ;
 // true si se está en modo arrastrar, false si no
 static bool modo_arrastrar = false ;
 
+// Añadido por mi
+static const int num_camaras = 3;
+static CamaraInteractiva * camaras[num_camaras] = {nullptr, nullptr, nullptr};
+static int camara_activa;
+
+const static float desp = 1;
 
 // ---------------------------------------------------------------------
 
-void P5_Inicializar(  int vp_ancho, int vp_alto )
-{
+void P5_Inicializar(  int vp_ancho, int vp_alto ) {
    cout << "Creando objetos de la práctica 5 .... " << flush ;
    // COMPLETAR: práctica 5: inicializar las variables de la práctica 5 (incluyendo el viewport)
-   // .......
+
+   camara_activa = 0;
+
 
    cout << "hecho." << endl << flush ;
 }
@@ -58,80 +65,78 @@ void P5_DibujarObjetos( ContextoVis & cv )
 
 // ---------------------------------------------------------------------
 
-bool P5_FGE_PulsarTeclaCaracter(  unsigned char tecla )
-{
+bool P5_FGE_PulsarTeclaCaracter(  unsigned char tecla ) {
 
-   bool result = true ;
+  bool result = true ;
 
-   switch ( toupper( tecla ) )
-   {
-      case 'C':
-         // COMPLETAR: práctica 5: activar siguiente camara
-         // .....
+  switch ( toupper( tecla ) ) {
+    case 'C':
+      camara_activa = (camara_activa + 1) % num_camaras;
+      cout << "Cárama actual cambiada a: " << camara_activa << endl;
+      camaras[camara_activa]->activar();
+      break ;
 
-         break ;
+    case 'V':
+      cout << "Modo de cámara actual cambiado a: ";
+      if ( camaras[camara_activa]->examinar ) {
+        camaras[camara_activa]->modoPrimeraPersona();
+        cout << "Primera Persona" << endl;
+      } else {
+        camaras[camara_activa]->modoExaminar();
+        cout << "Examinar" << endl;
+      }
+      break ;
 
-      case 'V':
-         // COMPLETAR: práctica 5: conmutar la cámara actual entre modo examinar y el modo primera persona
-         // .....
+    case '-':
+      cout << "Desplaza negativo de la cámara en Z" << endl;
+      camaras[camara_activa]->desplaZ( -1*desp );
+      break;
 
-         break ;
+    case '+':
+      cout << "Desplaza positivo de la cámara en Z" << endl;
+      camaras[camara_activa]->desplaZ( desp );
+      break;
 
-      case '-':
-         // COMPLETAR: práctica 5: desplazamiento en Z de la cámara actual (positivo) (desplaZ)
-         // .....
-
-         break;
-
-      case '+':
-         // COMPLETAR: práctica 5: desplazamiento en Z de la cámara actual (negativo) (desplaZ)
-         // .....
-
-         break;
-
-      default:
-         result = false ;
-         break ;
-	}
-   return result ;
+    default:
+      result = false ;
+      break ;
+  }
+  return result ;
 }
 // ---------------------------------------------------------------------
 
-bool P5_FGE_PulsarTeclaEspecial(  int tecla  )
-{
+bool P5_FGE_PulsarTeclaEspecial(  int tecla  ) {
 
-   bool result = true ;
+  bool result = true ;
 
+  switch ( tecla ) {
+    case GLFW_KEY_LEFT:
+      cout << "Desplaza hacia la izquierda la cámara" << endl;
+      camaras[camara_activa]->moverHV( -1*desp, 0 );
+      break;
 
-   switch ( tecla )
-   {
-      case GLFW_KEY_LEFT:
-         // COMPLETAR: práctica 5: desplazamiento/rotacion hacia la izquierda (moverHV)
-         // .....
+    case GLFW_KEY_RIGHT:
+      cout << "Desplaza hacia la derecha la cámara" << endl;
+      camaras[camara_activa]->moverHV( desp, 0 );
+      break;
 
-         break;
-      case GLFW_KEY_RIGHT:
-         // COMPLETAR: práctica 5: desplazamiento/rotación hacia la derecha (moverHV)
-         // .....
+    case GLFW_KEY_UP:
+      cout << "Desplaza hacia arriba la cámara" << endl;
+      camaras[camara_activa]->moverHV( 0, desp );
+      break;
 
-         break;
-      case GLFW_KEY_UP:
-         // COMPLETAR: práctica 5: desplazamiento/rotación hacia arriba (moverHV)
-         // .....
+    case GLFW_KEY_DOWN:
+      cout << "Desplaza hacia abajo la cámara" << endl;
+      camaras[camara_activa]->moverHV( 0, -1*desp );
+      break;
 
-         break;
-      case GLFW_KEY_DOWN:
-         // COMPLETAR: práctica 5: desplazamiento/rotación hacia abajo (moverHV)
-         // .....
-
-         break;
-      default:
-         result = false ;
-         break ;
-	}
-
-   return result ;
+    default:
+      result = false ;
+      break ;
+  }
+  return result ;
 }
+
 // ---------------------------------------------------------------------
 // se llama al hacer click con el botón izquierdo
 

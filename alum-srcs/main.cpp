@@ -172,8 +172,9 @@ void DibujarEscena() {
    LimpiarVentana();
 
    // Activamos los shaders ( no funcionan con las luces!! )
-   if ( contextoVis.modoVis != modoSombreadoPlano && contextoVis.modoVis != modoSombreadoSuave) {
-     //glUseProgram( id_programa );
+   if ( contextoVis.usarShader ) {
+     cout << "Activando shaders - incompatibles con las luces" << endl;
+     glUseProgram( id_programa );
    }
 
    DibujarEjesSolido() ;
@@ -188,19 +189,32 @@ void DibujarEscena() {
 
 // función que visualiza un frame o cuadro
 
-void VisualizarFrame()
-{
+void VisualizarFrame() {
    using namespace std ;
    using namespace chrono ;
 
-   // hacer que la ventana GLFW sea la ventana actual
-   glfwMakeContextCurrent( glfw_window );
+   /*if (practicaActual == 5) {
+     if ( la practica activa es la 5 )
+    actualizado: 3 de diciembre de 2018
+    // fijar matrices y viewport en P5:
+    página. 61 / 68Prács.IG (GIM,18-19)
+    Práctica 5. Interacción
+    P5_FijarMVPOpenGL( ventana_tam_x, ventana_tam_y ) ;
+    else // hacer lo mismo que antes:
+    {
+    FijarViewportProyeccion() ;
+    FijarCamara();
+    }
+  } else {*/
+     // hacer que la ventana GLFW sea la ventana actual
+     glfwMakeContextCurrent( glfw_window );
 
-   // ordenes OpenGL para dibujar la escena correspondiente a la práctica actual
-   DibujarEscena();
+     // ordenes OpenGL para dibujar la escena correspondiente a la práctica actual
+     DibujarEscena();
 
-   // visualizar en pantalla el buffer trasero (donde se han dibujado las primitivas)
-   glfwSwapBuffers( glfw_window );
+     // visualizar en pantalla el buffer trasero (donde se han dibujado las primitivas)
+     glfwSwapBuffers( glfw_window );
+   //}
 }
 
 // ---------------------------------------------------------------------
@@ -268,9 +282,7 @@ void FGE_PulsarTeclaCaracter( GLFWwindow* window, unsigned int codepoint )
          exit( 0 );
          break ;
       case 'P' :
-         //practicaActual = (practicaActual % numPracticas) +1 ;
-         practicaActual = (practicaActual) % 4 + 1;
-
+         practicaActual = (practicaActual % numPracticas) +1 ;
          cout << "Práctica actual cambiada a: " << practicaActual << endl << flush ;
          if ( practicaActual == 3 )
             FijarFuncDesocupado( FGE_Desocupado );
