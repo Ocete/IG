@@ -140,8 +140,8 @@ void Textura::activar(  ) {
   }
 
   // Configuramos la textura
-  // glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR );
-  // glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+   glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR );
+   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 }
 
 // *********************************************************************
@@ -177,8 +177,7 @@ Material::Material( const std::string & nombreArchivoJPG ) {
 // crea un material usando textura y coeficientes: ka,kd,ks y exponente
 // (la textura puede ser NULL, la ilum. queda activada)
 
-Material::Material( Textura * text, float ka, float kd, float ks, float exp )
-      /*:  Material()*/ {
+Material::Material( Textura * text, float ka, float kd, float ks, float exp ) {
    tex = text;
    iluminacion = true;
    coloresCero();
@@ -196,7 +195,6 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
    del.exp_brillo = exp;
    tra.exp_brillo = exp;
 
-   cout << "Creacion " << kd << del.difusa << VectorRGB(kd, kd, kd, 1.0) << endl;
 
    ponerNombre("material con textura e iluminación") ;
  }
@@ -205,12 +203,24 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
 // crea un material con un color único para las componentes ambiental y difusa
 // en el lugar de textura (textura == NULL)
 Material::Material( const Tupla3f & colorAmbDif, float ka, float kd, float ks,
-        float exp ) : Material (NULL, ka, kd, ks, exp) {
+        float exp ) {
 
-  color = {colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 0.0};
-  glColor4fv (color);
-  // glDisable( GL_COLOR_MATERIAL );
-  // glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+  tex = NULL;
+  iluminacion = true;
+  color = {colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 1.0};
+
+  del.emision   = VectorRGB(0.0,0.0,0.0, 1.0);
+  del.ambiente  = ka*color;
+  del.difusa    = kd*color;
+  del.especular = ks*color;
+
+  tra.emision   = VectorRGB(0.0,0.0,0.0, 1.0);
+  tra.ambiente  = ka*color;
+  tra.difusa    = kd*color;
+  tra.especular = ks*color;
+
+  del.exp_brillo = exp;
+  tra.exp_brillo = exp;
 
   ponerNombre("material color plano, ilum.") ;
 }
@@ -245,6 +255,7 @@ void Material::coloresCero() {
    del.exp_brillo =
    tra.exp_brillo = 1.0 ;
 }
+
 //----------------------------------------------------------------------
 
 Material::~Material() {
@@ -270,17 +281,13 @@ std::string Material::nombre() const {
 //----------------------------------------------------------------------
 
 void Material::activar(  ) {
-  //glLightModelfv( GL_LIGHT_MODEL_AMBIENT, Tupla4f {1,1,1,1} ) ;
+  //glLightModelfv( GL_LIGHT_MODEL_AMBIENT, Tupla4f {0.1,0.1,0.1,1} ) ;
 
   if (tex != NULL) {
     tex->activar();
   } else {
     glDisable( GL_TEXTURE_2D );
-    //glEnable( GL_COLOR_MATERIAL );
-    glColor4fv(color);
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    //glColor4fv(color);
   }
 
   if ( iluminacion ) {
@@ -307,33 +314,32 @@ void Material::activar(  ) {
   } else {
     glDisable( GL_LIGHTING );
     cout << "Fijando color " << color << endl;
+    //glEnable( Color_ )
     glColor4fv( color );
     glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
     glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-
-    //glEnable( GL_COLOR_MATERIAL );
   }
 }
 
 //----------------------------------------------------------------------
 
 MaterialLata::MaterialLata()
-    : Material (new Textura("../imgs/lata-coke.jpg"),0,1,1,0.5) {
+    : Material (new Textura("../imgs/lata-coke.jpg"),0.2,2,2.5,5) {
   ponerNombre( "MaterialLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialTapasLata::MaterialTapasLata()
-    : Material( Tupla3f{0.3,0.3,0.3}, 0.3, 0.9, 0.9, 0.5) {
+    : Material( Tupla3f{0.5,0.5,0.5}, 0.2, 2, 2.5, 5) {
   ponerNombre( "MaterialTapasLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialPeonMadera::MaterialPeonMadera()
-    : Material (new Textura("../imgs/text-madera.jpg"),0,0.9,0.9,1) {
+    : Material (new Textura("../imgs/text-madera.jpg"),0,0.7,1,5) {
   ponerNombre( "MaterialMadera" );
   //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
   //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
@@ -342,7 +348,7 @@ MaterialPeonMadera::MaterialPeonMadera()
 //----------------------------------------------------------------------
 
 MaterialPeonBlanco::MaterialPeonBlanco()
-    : Material( Tupla3f{1,1,1}, 0.1, 0.9, 0, 0) {
+    : Material( Tupla3f{1,1,1}, 0, 1, 0, 0) {
   ponerNombre( "MaterialBlanco" );
   //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
   //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
@@ -351,7 +357,7 @@ MaterialPeonBlanco::MaterialPeonBlanco()
 //----------------------------------------------------------------------
 
 MaterialPeonNegro::MaterialPeonNegro()
-    : Material( Tupla3f{0,0,0}, 0, 0.3, 0.9, 1) {
+    : Material( Tupla3f{0.2,0.2,0.2}, 0, 0, 2, 5) {
   ponerNombre( "MaterialNegro" );
   //del.emision = Tupla4f{0.0,0.0,0.0,1.0};
   //tra.emision = Tupla4f{0.0,0.0,0.0,1.0};

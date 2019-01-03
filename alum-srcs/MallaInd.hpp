@@ -55,7 +55,7 @@ class MallaInd : public Objeto3D
       // visualizar en modo inmediato con sombreado suave (Gouroud)
       void visualizarDE_MI_SombreadoSuave( ContextoVis & cv );
       // visualizar en modo inmediato con sombreado suave (Gouroud)
-      void visualizarDE_MI_Sombreado( ContextoVis & cv );
+      void visualizarDE_MI_Texturas( ContextoVis & cv );
 
       // visualizar en modo inmediato para el Examen
       void visualizarDE_MI_DrawExamen( ContextoVis & cv );

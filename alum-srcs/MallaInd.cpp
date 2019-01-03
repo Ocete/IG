@@ -155,19 +155,19 @@ void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
 
 void MallaInd::visualizarDE_MI_SombreadoPlano( ContextoVis & cv ) {
   glShadeModel( GL_FLAT );
-  visualizarDE_MI_Sombreado(cv);
+  visualizarDE_MI_Texturas(cv);
 }
 
 // -----------------------------------------------------------------------------
 
 void MallaInd::visualizarDE_MI_SombreadoSuave( ContextoVis & cv ) {
   glShadeModel( GL_SMOOTH );
-  visualizarDE_MI_Sombreado(cv);
+  visualizarDE_MI_Texturas(cv);
 }
 
 // -----------------------------------------------------------------------------
 
-void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
+void MallaInd::visualizarDE_MI_Texturas( ContextoVis & cv ) {
   int index;
 
   /*glBegin( GL_TRIANGLES );
@@ -270,6 +270,9 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
       break;
+    case modoMateriales:
+      glDisable( GL_LIGHTING );
+      visualizarDE_MI_Texturas(cv);
     default:
       glDisable( GL_LIGHTING );
       //glDisable( GL_TEXTURE_2D );
@@ -401,6 +404,7 @@ void MallaInd::PolygonMode ( ContextoVis & cv ) {
     case modoExamen:
     case modoSombreadoPlano:
     case modoSombreadoSuave:
+    case modoMateriales:
       mode = GL_FILL;
       break;
     case modoPuntos:

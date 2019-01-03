@@ -31,7 +31,7 @@ void P4_Inicializar( ContextoVis & cv ) {
    angulo_activo = 0;
    colFuentes->activar(0);
    colFuentes->insertar( new FuenteDireccional(-10, 30, VectorRGB(1,1,1,1) ) );
-   colFuentes->insertar( new FuentePosicional( {10,10,10}, {1,1,1,0} ) );
+   colFuentes->insertar( new FuentePosicional( {2.5,0,10}, {1,1,1,0} ) );
 
    //glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
 
