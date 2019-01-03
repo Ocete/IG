@@ -14,7 +14,7 @@
 using namespace std ;
 
 static C4 * c4;
-//static ColFuentesLuz colFuentes;
+static ColFuentesLuz  * colFuentes;
 int angulo_activo;
 
 // ---------------------------------------------------------------------
@@ -27,14 +27,13 @@ void P4_Inicializar( ContextoVis & cv ) {
 
    c4 = new C4();
 
-   cv.colFuentes = new ColFuentesLuz();
+   colFuentes = new ColFuentesLuz();
    angulo_activo = 0;
-   cv.colFuentes->activar(0);
+   colFuentes->activar(0);
+   colFuentes->insertar( new FuenteDireccional(-10, 30, VectorRGB(1,1,1,1) ) );
+   colFuentes->insertar( new FuentePosicional( {10,10,10}, {1,1,1,0} ) );
 
-   cv.colFuentes->insertar( new FuenteDireccional(30, 30, VectorRGB(0.4,0.5,0,1) ) );
-   cv.colFuentes->insertar( new FuentePosicional( {10,10,10}, {0,0,1,0} ) );
-
-   glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
+   //glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
 
    cout << "hecho." << endl << flush ;
 }
@@ -68,7 +67,7 @@ bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla, ContextoVis & cv ) {
       break ;
   }
   if (key != -1) {
-    res = cv.colFuentes->ptrFuente(0)->gestionarEventoTeclaEspecial(key);
+    res = colFuentes->ptrFuente(0)->gestionarEventoTeclaEspecial(key);
   }
 
   return res ;
@@ -82,10 +81,10 @@ bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla, ContextoVis & cv ) {
 void P4_DibujarObjetos( ContextoVis & cv ) {
   if (c4 != nullptr) {
     glEnable( GL_LIGHTING );
-    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
-      cv.colFuentes->activar( 0 );
-    }
     c4->visualizarGL( cv );
-    glDisable( GL_LIGHTING );
+    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+      colFuentes->activar( 0 );
+    }
+    //glDisable( GL_LIGHTING );
   }
 }

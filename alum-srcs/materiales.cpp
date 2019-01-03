@@ -98,8 +98,6 @@ void Textura::enviar() {
   gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, imagen->tamX(), imagen->tamY(),
       GL_RGB, GL_UNSIGNED_BYTE, imagen->leerPixels() );
 
-      cout << "Textura enviada " << imagen->tamX() << imagen->tamY() << " " << ident_textura << endl;
-
   enviada = true;
 }
 
@@ -119,7 +117,6 @@ Textura::~Textura( ) {
 // por ahora, se asume la unidad de texturas #0
 
 void Textura::activar(  ) {
-  cout << "activando textura" << endl;
   if ( !enviada ) {
    enviar();
   }
@@ -162,7 +159,7 @@ Material::Material( const std::string & nombreArchivoJPG ) {
    iluminacion    = true ;
    tex            = new Textura( nombreArchivoJPG ) ;
 
-   //coloresCero();
+   coloresCero();
 
    del.emision   = VectorRGB(0.0,0.0,0.0,1.0);
    del.ambiente  = VectorRGB( 0.0, 0.0, 0.0, 1.0);
@@ -184,7 +181,7 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
       /*:  Material()*/ {
    tex = text;
    iluminacion = true;
-   //coloresCero();
+   coloresCero();
 
    del.emision   = VectorRGB(0.0,0.0,0.0, 1.0);
    del.ambiente  = VectorRGB(ka, ka, ka, 1.0);
@@ -210,7 +207,8 @@ Material::Material( Textura * text, float ka, float kd, float ks, float exp )
 Material::Material( const Tupla3f & colorAmbDif, float ka, float kd, float ks,
         float exp ) : Material (NULL, ka, kd, ks, exp) {
 
-  color = {colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 1.0};
+  color = {colorAmbDif[0], colorAmbDif[1], colorAmbDif[2], 0.0};
+  glColor4fv (color);
   // glDisable( GL_COLOR_MATERIAL );
   // glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 
@@ -222,7 +220,6 @@ Material::Material( const Tupla3f & colorAmbDif, float ka, float kd, float ks,
 Material::Material( const float r, const float g, const float b ) {
   tex = NULL;
   iluminacion = false;
-  cout << "llamando a coloresCero" << endl;
   coloresCero();
   color = VectorRGB(r,g,b, 1.0);
   ponerNombre("material con color plano, sin iluminación");
@@ -273,33 +270,33 @@ std::string Material::nombre() const {
 //----------------------------------------------------------------------
 
 void Material::activar(  ) {
-  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, Tupla4f {1,1,1,1} ) ;
+  //glLightModelfv( GL_LIGHT_MODEL_AMBIENT, Tupla4f {1,1,1,1} ) ;
 
   if (tex != NULL) {
     tex->activar();
   } else {
-    cout << "Fijando color para " << nombre() << endl;
     glDisable( GL_TEXTURE_2D );
-    glDisable( GL_COLOR_MATERIAL );
+    //glEnable( GL_COLOR_MATERIAL );
     glColor4fv(color);
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    //glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
   }
 
   if ( iluminacion ) {
-    cout << "Activada la iluminacion" << endl;
+     //cout << "Activando material: " << nombre() << endl;
+     //cout << del.ambiente << del.difusa << endl;
+     //cout << del.especular << del.exp_brillo << endl;
+     //cout << tra.ambiente << tra.difusa << endl;
+     //cout << tra.especular << tra.exp_brillo << endl;
 
-     cout << "Activando material: " << nombre() << endl;
-     cout << del.ambiente << del.difusa << endl;
-     cout << del.especular << del.exp_brillo << endl;
-     cout << tra.ambiente << tra.difusa << endl;
-     cout << tra.especular << tra.exp_brillo << endl;
-
-    glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
+    //glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
     glMaterialfv( GL_FRONT, GL_AMBIENT, del.ambiente ) ;
     glMaterialfv( GL_FRONT, GL_DIFFUSE, del.difusa ) ;
     glMaterialfv( GL_FRONT, GL_SPECULAR, del.especular ) ;
     glMaterialf( GL_FRONT, GL_SHININESS, del.exp_brillo ) ;
 
-    glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
+    //glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
     glMaterialfv( GL_BACK, GL_AMBIENT, tra.ambiente ) ;
     glMaterialfv( GL_BACK, GL_DIFFUSE, tra.difusa ) ;
     glMaterialfv( GL_BACK, GL_SPECULAR, tra.especular ) ;
@@ -308,12 +305,12 @@ void Material::activar(  ) {
     glEnable (GL_LIGHTING);
 
   } else {
-    cout << "Desactivada la iluminacion" << endl;
     glDisable( GL_LIGHTING );
+    cout << "Fijando color " << color << endl;
     glColor4fv( color );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
-    //glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_EMISSION );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 
     //glEnable( GL_COLOR_MATERIAL );
   }
@@ -322,42 +319,42 @@ void Material::activar(  ) {
 //----------------------------------------------------------------------
 
 MaterialLata::MaterialLata()
-    : Material (new Textura("../imgs/lata-coke.jpg"),0.5,1,1,1) {
+    : Material (new Textura("../imgs/lata-coke.jpg"),0,1,1,0.5) {
   ponerNombre( "MaterialLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialTapasLata::MaterialTapasLata()
-    : Material( Tupla3f{0.3,0.3,0.3}, 1, 1, 1, 1) {
+    : Material( Tupla3f{0.3,0.3,0.3}, 0.3, 0.9, 0.9, 0.5) {
   ponerNombre( "MaterialTapasLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialPeonMadera::MaterialPeonMadera()
-    : Material (new Textura("../imgs/text-madera.jpg"),0.5,1,1,1) {
+    : Material (new Textura("../imgs/text-madera.jpg"),0,0.9,0.9,1) {
   ponerNombre( "MaterialMadera" );
-  del.emision = Tupla4f{0,0,0,1.0};
-  tra.emision = Tupla4f{0,0,0,1.0};
+  //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
+  //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
 }
 
 //----------------------------------------------------------------------
 
 MaterialPeonBlanco::MaterialPeonBlanco()
-    : Material( Tupla3f{1,1,1}, 1, 1, 0, 0) {
+    : Material( Tupla3f{1,1,1}, 0.1, 0.9, 0, 0) {
   ponerNombre( "MaterialBlanco" );
-  del.emision = Tupla4f{0,0,0,1.0};
-  tra.emision = Tupla4f{0,0,0,1.0};
+  //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
+  //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
 }
 
 //----------------------------------------------------------------------
 
 MaterialPeonNegro::MaterialPeonNegro()
-    : Material( Tupla3f{0,0,0}, 1, 0.2, 1, 2) {
+    : Material( Tupla3f{0,0,0}, 0, 0.3, 0.9, 1) {
   ponerNombre( "MaterialNegro" );
-  del.emision = Tupla4f{0.0,0.0,0.0,1.0};
-  tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
+  //del.emision = Tupla4f{0.0,0.0,0.0,1.0};
+  //tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
 }
 
 //**********************************************************************
@@ -424,8 +421,8 @@ bool FuenteLuz::gestionarEventoTeclaEspecial( int key ) {
 
 FuenteDireccional::FuenteDireccional(float alpha_inicial, float beta_inicial,
   const VectorRGB & p_color) : FuenteLuz (p_color) {
-    this->lati_ini = lati_ini;
-    this->longi_ini = longi_ini;
+    lati_ini = alpha_inicial;
+    longi_ini = beta_inicial;
     lati = lati_ini;
     longi = longi_ini;
 }
@@ -440,7 +437,6 @@ void FuenteDireccional::activar() {
   // Habilitamos la fuente
   glEnable(GL_LIGHT0+ind_fuente);
 
-  cout << "Activando fuente: " << col_ambiente << col_difuso << col_especular << endl;
   // Colores de ambiente
   glLightfv( GL_LIGHT0 + ind_fuente, GL_AMBIENT, col_ambiente );
   glLightfv( GL_LIGHT0 + ind_fuente, GL_DIFFUSE, col_difuso );
@@ -554,7 +550,6 @@ void ColFuentesLuz::insertar( FuenteLuz * pf ) {
 // activa una colección de fuentes de luz
 void ColFuentesLuz::activar( unsigned id_prog ) {
 
-  cout << "Activada la iluminacion" << endl;
   glEnable(GL_LIGHTING);
   for (int i=0; i<vpf.size(); i++) {
     vpf[i]->activar();

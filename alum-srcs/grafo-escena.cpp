@@ -558,7 +558,7 @@ PeonP4::PeonP4(int tipo) {
   }
   ponerNombre( nombre );
   bool textura = tipo == 0;
-  agregar( new MallaRevol("../plys/peon.ply", 3, 1, 0, textura) );
+  agregar( new MallaRevol("../plys/peon.ply", 30, 1, 0, textura) );
   // cout << "Creado: " << nombre << endl;
 }
 
@@ -573,8 +573,8 @@ Lata::Lata () {
 // -----------------------------------------------------------------------------
 
 TapaSuperiorLata::TapaSuperiorLata () {
-  agregar( new MallaRevol("../plys/lata-psup.ply", 30, 1, 0, 0) );
   agregar( new MaterialTapasLata() );
+  agregar( new MallaRevol("../plys/lata-psup.ply", 30, 1, 0, 0) );
 }
 
 // -----------------------------------------------------------------------------

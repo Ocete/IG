@@ -125,7 +125,7 @@ void MallaRevol::asignarCoordenadasTextura( const vector<Tupla3f> &
   for (int i=0; i<nperfiles; i++) {
     s_i = (double) i / (nperfiles - 1);
     for (int j=0; j<perfil_original.size(); j++) {
-        t_j = (double) perfil_dist[j] / mayor_dist;
+        t_j = 1.0 - ( (double) perfil_dist[j] / mayor_dist );
         coordenadas_textura.push_back( { s_i, t_j } );
     }
   }

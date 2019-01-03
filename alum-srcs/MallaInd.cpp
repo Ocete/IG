@@ -185,17 +185,18 @@ void MallaInd::visualizarDE_MI_Sombreado( ContextoVis & cv ) {
   }
   glEnd();*/
 
-  std::cout << "sombreado: " << coordenadas_textura.size() << std::endl;
   if (coordenadas_textura.size() > 0) {
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
+  if (normales_vertices.size() > 0) {
+    glNormalPointer(GL_FLOAT, 0, normales_vertices.data());
+    glEnableClientState(GL_NORMAL_ARRAY);
+  }
 
   glVertexPointer(3, GL_FLOAT, 0, vertices.data());
-  glNormalPointer(GL_FLOAT, 0, normales_vertices.data());
+  glEnableClientState(GL_VERTEX_ARRAY);
 
   //glColor3fv ( Tupla3f{0.3,0.3,0.3} );
 
@@ -255,23 +256,23 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
 
   switch (cv.modoVis) {
     case modoExamen:
-      //glDisable( GL_LIGHTING );
-      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_LIGHTING );
+      //glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawExamen(cv);
       break;
     case modoSombreadoPlano:
-      //glEnable( GL_LIGHTING );
-      glEnable( GL_TEXTURE_2D );
+      glEnable( GL_LIGHTING );
+      //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoPlano(cv);
       break;
     case modoSombreadoSuave:
       glEnable( GL_LIGHTING );
-      glEnable( GL_TEXTURE_2D );
+      //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
       break;
     default:
-      //glDisable( GL_LIGHTING );
-      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_LIGHTING );
+      //glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawElements(cv);
       // visualizarDE_MI_Vertex(cv);
       // visualizarDE_MI_DrawArrays(cv);

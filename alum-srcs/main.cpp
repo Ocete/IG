@@ -163,17 +163,19 @@ void FijarMVPOpenGL()
 // -----------------------------------------------------------------------------
 // órdenes de OpenGL que fijan la camara y visualizan la escena
 
-void DibujarEscena()
-{
+void DibujarEscena() {
    if ( practicaActual == 5 )
       P5_FijarMVPOpenGL( ventana_tam_x, ventana_tam_y );
    else
       FijarMVPOpenGL();
 
-
-
    LimpiarVentana();
-   glUseProgram( id_programa );
+
+   // Activamos los shaders ( no funcionan con las luces!! )
+   if ( contextoVis.modoVis != modoSombreadoPlano && contextoVis.modoVis != modoSombreadoSuave) {
+     //glUseProgram( id_programa );
+   }
+
    DibujarEjesSolido() ;
    DibujarObjetos();
 }
