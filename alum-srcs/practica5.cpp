@@ -9,6 +9,7 @@
 #include "tuplasg.hpp"   // Tupla3f
 #include "practicas.hpp"
 #include "practica5.hpp"
+#include "grafo-escena.hpp"
 
 #include "CamaraInter.hpp"
 
@@ -25,41 +26,63 @@ Viewport viewport ;
 static bool modo_arrastrar = false ;
 
 // Añadido por mi
-static const int num_camaras = 3;
-static CamaraInteractiva * camaras[num_camaras] = {nullptr, nullptr, nullptr};
+static const int num_camaras = 2;
+static CamaraInteractiva * camaras[num_camaras] = {nullptr, nullptr}; //, nullptr};
 static int camara_activa;
 
 const static float desp = 1;
 
+float xant, yant;
+static C2 * c2;
+
 // ---------------------------------------------------------------------
 
 void P5_Inicializar(  int vp_ancho, int vp_alto ) {
-   cout << "Creando objetos de la práctica 5 .... " << flush ;
-   // COMPLETAR: práctica 5: inicializar las variables de la práctica 5 (incluyendo el viewport)
+  cout << "Creando objetos de la práctica 5 .... " << flush ;
+  // COMPLETAR: práctica 5: inicializar las variables de la práctica 5 (incluyendo el viewport)
 
-   camara_activa = 0;
+  c2 = new C2();
+  int ident = 1;
+  c2->asignarIdentificadores( ident );
 
+  viewport = Viewport (0, 0, vp_ancho, vp_alto);
 
-   cout << "hecho." << endl << flush ;
+  camara_activa = 0;
+  camaras[0] = new CamaraInteractiva (false, vp_ancho * (1.0) / vp_alto, 0, 0,
+                                      {0,0,0}, false, 135, 2);
+  camaras[1] = new CamaraInteractiva (false, vp_ancho * (1.0) / vp_alto, 0, 0,
+                                      {0,0,0}, true, 90, 2);
+
+  cout << "hecho." << endl << flush ;
 }
+
 // ---------------------------------------------------------------------
 
-void P5_FijarMVPOpenGL( int vp_ancho, int vp_alto )
-{
-   // COMPLETAR: práctica 5: actualizar viewport, actualizar y activar la camara actual
+void P5_FijarMVPOpenGL( int vp_ancho, int vp_alto ) {
+   // COMPLETADO: práctica 5: actualizar viewport, actualizar y activar la camara actual
    //     (en base a las dimensiones del viewport)
-   // .......
 
+  viewport.ancho = vp_ancho;
+  viewport.alto = vp_alto;
+  camaras[camara_activa]->ratio_yx_vp = vp_ancho * (1.0) / vp_alto;
 
+  camaras[camara_activa]->activar();
 }
+
 // ---------------------------------------------------------------------
 
-void P5_DibujarObjetos( ContextoVis & cv )
-{
+void P5_DibujarObjetos( ContextoVis & cv ) {
+  // COMPLETAR: práctica 5: activar las fuentes de luz y visualizar la escena
+  //      (se supone que la camara actual ya está activada)
 
-   // COMPLETAR: práctica 5: activar las fuentes de luz y visualizar la escena
-   //      (se supone que la camara actual ya está activada)
-   // .......
+  if (c2 != nullptr) {
+    //glDisable( GL_LIGHTING );
+    c2->visualizarGL( cv );
+    /*if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+      colFuentes->activar( 0 );
+    }*/
+    //glDisable( GL_LIGHTING );
+  }
 
 }
 
@@ -140,52 +163,66 @@ bool P5_FGE_PulsarTeclaEspecial(  int tecla  ) {
 // ---------------------------------------------------------------------
 // se llama al hacer click con el botón izquierdo
 
-void P5_ClickIzquierdo( int x, int y )
-{
+void P5_ClickIzquierdo( int x, int y ) {
+  // COMPLETAR: práctica 5: visualizar escena en modo selección y leer el color del pixel en (x,y)
 
-   // COMPLETAR: práctica 5: visualizar escena en modo selección y leer el color del pixel en (x,y)
+  // 1. crear un 'contextovis' apropiado
+  ContextoVis contexto;
+  contexto.modoVis = modoSolido;
+  contexto.modoSeleccionFBO = true;
+  glColor3ub(0,0,0);
 
+  // 2. visualizar en modo selección (sobre el backbuffer)
+  c2->visualizarGL( contexto );
 
-   // 1. crear un 'contextovis' apropiado
-   // .....
+  // 3. leer el color del pixel, si es 0 no se hace nada
+  int ident_leido = LeerIdentEnPixel(x, y);
+  if ( ident_leido <= 0 ) {
+    cout << "Ningun objeto seleccionado" << endl;
+    return;
+  }
 
-   // 2. visualizar en modo selección (sobre el backbuffer)
-   // ....
+  // 4. buscar el objeto en el grafo de escena e informar del mismo
+  Objeto3D ** p_obj;
+  Tupla3f centro;
+  if ( !c2->buscarObjeto( ident_leido, camaras[camara_activa]->mcv.matrizVista,
+          p_obj, centro ) ) {
+    cout << "ERROR: Objeto no encontrado en el arbol. ";
+    cout << "Identificador: " << ident_leido << endl;
+    return;
+  }
 
-   // 3. leer el color del pixel, si es 0 no se hace nada
-   // .....
-
-   // 4. buscar el objeto en el grafo de escena e informar del mismo
-   // .....
-
+  cout << "Objeto fijado con identificador: " << ident_leido << endl;
+  camaras[camara_activa]->modoExaminar( centro );
 }
+
 // ---------------------------------------------------------------------
 // se llama al mover el botón en modo arrastrar
 
-void P5_InicioModoArrastrar( int x, int y )
-{
-   // COMPLETAR: práctica 5: activar bool de modo arrastrar, registrar (x,y) de inicio del modo arrastrar
-   // .....
-
+void P5_InicioModoArrastrar( int x, int y ) {
+   // COMPLETADO: práctica 5: activar bool de modo arrastrar
+   // registrar (x,y) de inicio del modo arrastrar
+   xant = x;
+   yant = y;
+   modo_arrastrar = true;
 }
+
 // ---------------------------------------------------------------------
 // se llama al subir el botón derecho del ratón
 
-void P5_FinModoArrastrar()
-{
-   // COMPLETAR: práctica 5: desactivar bool del modo arrastrar
-   // .....
-
+void P5_FinModoArrastrar() {
+   // COMPLETADO: práctica 5: desactivar bool del modo arrastrar
+   modo_arrastrar = false;
 }
 // ---------------------------------------------------------------------
 // se llama durante el modo arrastrar
 
-void P5_RatonArrastradoHasta( int x, int y )
-{
-   // COMPLETAR: práctica 5: calcular desplazamiento desde inicio de modo arrastrar, actualizar la camara (moverHV)
-   // .....
-
-
+void P5_RatonArrastradoHasta( int x, int y ) {
+   // COMPLETADO: calcular desplazamiento desde inicio de modo arrastrar
+   // actualizar la camara (moverHV)
+   camaras[camara_activa]->moverHV ( x-xant, y-yant );
+   xant = x;
+   yant = y;
 }
 // ---------------------------------------------------------------------
 // pulsar/levantar botón del ratón, específico de la práctica 5
@@ -215,29 +252,35 @@ bool P5_FGE_RatonMovidoPulsado( int x, int y )
    else
       return false ;
 }
+
 // ---------------------------------------------------------------------
 
-bool P5_FGE_Scroll( int direction )
-{
-   // COMPLETAR: práctica 5: acercar/alejar la camara (desplaZ)
-   // .....
-
+bool P5_FGE_Scroll( int direction ) {
+   // COMPLETADO: acercar/alejar la camara (desplaZ)
+   camaras[camara_activa]->desplaZ( direction );
    return true ;
 }
+
 // ---------------------------------------------------------------------
 
-void FijarColorIdent( const int ident )  // 0 ≤ ident < 2^24
-{
-   // COMPLETAR: práctica 5: fijar color actual de OpenGL usando 'ident' (glColor3ub)
-   // .....
-
+void FijarColorIdent( const int ident ) { // 0 ≤ ident < 2^24
+  // COMPLETADO: fijar color actual de OpenGL usando 'ident' (glColor3ub)
+  const unsigned char
+  byteR = ( ident ) % 0x100U,             // rojo = byte menos significativo
+  byteG = ( ident / 0x100U ) % 0x100U,    // verde = byte intermedio
+  byteB = ( ident / 0x10000U ) % 0x100U;  // azul = byte más significativo
+  glColor3ub( byteR, byteG, byteB );
 }
+
 //---------------
 
-int LeerIdentEnPixel( int xpix, int ypix )
-{
-   // COMPLETAR: práctica 5: leer el identificador codificado en el color del pixel (x,y)
-   // .....
-
+int LeerIdentEnPixel( int xpix, int ypix ) {
+  // COMPLETADO:leer el identificador codificado en el color del pixel (x,y)
+  unsigned char bytes[3] ; // para guardar los tres bytes
+  // leer los 3 bytes del frame-buffer
+  glReadPixels( xpix, ypix, 1, 1, GL_RGB,GL_UNSIGNED_BYTE, (void *)bytes);
+  // reconstruir el indentificador y devolverlo:
+  return bytes[0] + ( 0x100U* bytes[1] ) + ( 0x10000U* bytes[2] ) ;
 }
+
 //---------------

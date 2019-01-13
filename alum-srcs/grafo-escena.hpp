@@ -64,6 +64,7 @@ class NodoGrafoEscena : public Objeto3D {
 protected:
      std::vector<EntradaNGE> entradas ;
      bool color_fijado;
+     bool centro_calculado;
 public:
 
    NodoGrafoEscena() ;
@@ -94,6 +95,8 @@ public:
    // si 'centro_calculado' es 'false', recalcula el centro usando los centros
    // de los hijos (el punto medio de la caja englobante de los centros de hijos)
    virtual void calcularCentroOC() ;
+
+   void asignarIdentificadores( int &nuevo_ident );
 
 } ;
 

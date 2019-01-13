@@ -25,6 +25,7 @@
 #include "MallaInd.hpp" // Añadido por mi
 #include "MallaRevol.hpp" // Añadido por mi
 #include <sstream> // Para el stringstream
+//#include "tuplasg.hpp"
 
 using namespace std ;
 
@@ -81,13 +82,24 @@ EntradaNGE::~EntradaNGE() {
 // -----------------------------------------------------------------------------
 // Visualiza usando OpenGL
 
-void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
-{
+void NodoGrafoEscena::visualizarGL( ContextoVis & cv ) {
   // guarda modelview actual
   glMatrixMode( GL_MODELVIEW );
   glPushMatrix() ;
   cv.pilaMateriales.push();
   for( unsigned i = 0 ; i < entradas.size() ; i++ ) {
+
+    // Para la practica 5, fijamos el color actual como el identificador
+    // CUIDADO: no activar las entradas de tipo material en el bucle de
+    // abajo si modoSeleccion esta activado
+    if ( cv.modoSeleccionFBO ) {
+      int ident = leerIdentificador();
+      //cout << "Color fijado a " << ident << endl;
+      if ( ident != -1 ) {
+        FijarColorIdent ( ident );
+      }
+    }
+
     if( entradas[i].tipo == TipoEntNGE::objeto ) {
       // si la entrada es sub-objeto, visualizarlo
       entradas[i].objeto->visualizarGL( cv ) ;
@@ -95,7 +107,8 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
       // si la entrada es transformación, componerla
       glMatrixMode( GL_MODELVIEW );
       glMultMatrixf( *(entradas[i].matriz) );
-    } else if (entradas[i].tipo == TipoEntNGE::material ) {
+    } else if (entradas[i].tipo == TipoEntNGE::material &&
+                          !cv.modoSeleccionFBO ) {
       // si la entrada es un material, lo activas
       cv.pilaMateriales.activarMaterial( entradas[i].material );
     }
@@ -106,8 +119,19 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv )
   glPopMatrix();
 }
 // -----------------------------------------------------------------------------
+void NodoGrafoEscena::asignarIdentificadores( int &nuevo_ident ) {
+  ponerIdentificador ( nuevo_ident );
+  nuevo_ident++;
+  for (int i=0; i<entradas.size(); i++) {
+    if (entradas[i].tipo == TipoEntNGE::objeto) {
+      entradas[i].objeto->asignarIdentificadores(nuevo_ident);
+    }
+  }
+}
+// -----------------------------------------------------------------------------
 NodoGrafoEscena::NodoGrafoEscena() {
   color_fijado = false;
+  centro_calculado = false;
 }
 // -----------------------------------------------------------------------------
 void NodoGrafoEscena::fijarColorNodo( const Tupla3f & nuevo_color ) {
@@ -159,14 +183,24 @@ Matriz4f * NodoGrafoEscena::leerPtrMatriz( unsigned indice )
 // si 'centro_calculado' es 'false', recalcula el centro usando los centros
 // de los hijos (el punto medio de la caja englobante de los centros de hijos)
 
-void NodoGrafoEscena::calcularCentroOC()
-{
+void NodoGrafoEscena::calcularCentroOC() {
+  // COMPLETADO: práctica 5: calcular y guardar el centro del nodo
+  // en coordenadas de objeto (hay que hacerlo recursivamente)
+  // (si el centro ya ha sido calculado, no volver a hacerlo)
 
-   // COMPLETAR: práctica 5: calcular y guardar el centro del nodo
-   //    en coordenadas de objeto (hay que hacerlo recursivamente)
-   //   (si el centro ya ha sido calculado, no volver a hacerlo)
-   // ........
-
+  if ( !centro_calculado ) {
+    Tupla3f centro = {0,0,0};
+    float n_centros = 0;
+    for (int i=0; i<entradas.size(); i++) {
+        if (entradas[i].tipo == TipoEntNGE::objeto) {
+          n_centros++;
+          centro = centro + entradas[i].objeto->leerCentroOC();
+        }
+    }
+    centro = 1 / n_centros * centro;
+    ponerCentroOC( centro );
+    centro_calculado = true;
+  }
 }
 // -----------------------------------------------------------------------------
 // método para buscar un objeto con un identificador y devolver un puntero al mismo
@@ -179,9 +213,27 @@ bool NodoGrafoEscena::buscarObjeto
    Tupla3f &         centro_wc   // (salida) centro del objeto en coordenadas del mundo
 )
 {
-   // COMPLETAR: práctica 5: buscar un sub-objeto con un identificador
-   // ........
+  // COMPLETADO: práctica 5: buscar un sub-objeto con un identificador
+  assert(0<ident_busc);
 
+  if ( !centro_calculado ) {
+    calcularCentroOC();
+  }
+
+  if ( leerIdentificador() == ident_busc ) {
+    centro_wc = mmodelado*leerCentroOC();
+    if ( objeto != nullptr ) {
+      *objeto = this ;
+    }
+    return true;
+  } else {
+    bool found = false;
+    for (int i=0; i<entradas.size() && !found; i++) {
+      found = entradas[i].tipo == TipoEntNGE::objeto && entradas[i].objeto->buscarObjeto(
+            ident_busc, mmodelado, objeto, centro_wc );
+    }
+    return found;
+  }
 }
 
 // *****************************************************************************

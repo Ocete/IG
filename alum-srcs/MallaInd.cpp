@@ -122,7 +122,24 @@ void MallaInd::visualizarDE_MI_DrawArrays( ContextoVis & cv ) {
 
 // -----------------------------------------------------------------------------
 
-void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
+void MallaInd::visualizarDE_MI_Raw_DrawElements ( ContextoVis & cv ) {
+  // habilitar punteros a vertices y establecer direccion y estructura de estos
+  glEnableClientState( GL_VERTEX_ARRAY );
+  glVertexPointer( 3, GL_FLOAT, 0, vertices.data() );
+
+  // Dibujar
+  glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
+
+  // Inhabilitar punteros
+  glDisableClientState( GL_VERTEX_ARRAY );
+  glDisableClientState( GL_COLOR_ARRAY );
+  glDisableClientState( GL_NORMAL_ARRAY );
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+// -----------------------------------------------------------------------------
+
+void MallaInd::visualizarDE_MI_ColoresNormales( ContextoVis & cv ) {
   glEnable( GL_SMOOTH );
 
   // Si hay colores, habilitar punteros a colores y establecer direccion y
@@ -138,17 +155,7 @@ void MallaInd::visualizarDE_MI_DrawElements( ContextoVis & cv ) {
     glNormalPointer ( GL_FLOAT, 0, normales_vertices.data() );
   }
 
-  // habilitar punteros a vertices y establecer direccion y estructura de estos
-  glEnableClientState( GL_VERTEX_ARRAY );
-  glVertexPointer( 3, GL_FLOAT, 0, vertices.data() );
-
-  // Dibujar
-  glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
-
-  // Inhabilitar punteros
-  glDisableClientState( GL_VERTEX_ARRAY );
-  glDisableClientState( GL_COLOR_ARRAY );
-  glDisableClientState( GL_NORMAL_ARRAY );
+  visualizarDE_MI_Raw_DrawElements(cv);
 }
 
 // -----------------------------------------------------------------------------
@@ -195,16 +202,7 @@ void MallaInd::visualizarDE_MI_Texturas( ContextoVis & cv ) {
     glEnableClientState(GL_NORMAL_ARRAY);
   }
 
-  glVertexPointer(3, GL_FLOAT, 0, vertices.data());
-  glEnableClientState(GL_VERTEX_ARRAY);
-
-  //glColor3fv ( Tupla3f{0.3,0.3,0.3} );
-
-  glDrawElements( GL_TRIANGLES, caras.size()*3, GL_UNSIGNED_INT, caras.data() );
-
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  visualizarDE_MI_Raw_DrawElements(cv);
 }
 
 // -----------------------------------------------------------------------------
@@ -254,6 +252,13 @@ void MallaInd::visualizarDE_MI_DrawExamen( ContextoVis & cv ) {
 
 void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
 
+  if ( cv.modoSeleccionFBO ) {
+    glDisable ( GL_TEXTURE_2D );
+    glDisable ( GL_LIGHTING );
+    visualizarDE_MI_Raw_DrawElements(cv);
+    return;
+  }
+
   switch (cv.modoVis) {
     case modoExamen:
       glDisable( GL_LIGHTING );
@@ -270,13 +275,15 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
       break;
-    case modoMateriales:
-      glDisable( GL_LIGHTING );
-      visualizarDE_MI_Texturas(cv);
+    case modoSeleccion:
+      //glDisable ( GL_TEXTURE_2D );
+      glDisable ( GL_LIGHTING );
+      glColor3ub(0,0,0);
+      visualizarDE_MI_Raw_DrawElements(cv);
+      break;
     default:
       glDisable( GL_LIGHTING );
-      //glDisable( GL_TEXTURE_2D );
-      visualizarDE_MI_DrawElements(cv);
+      visualizarDE_MI_ColoresNormales(cv);
       // visualizarDE_MI_Vertex(cv);
       // visualizarDE_MI_DrawArrays(cv);
   }
@@ -400,18 +407,14 @@ void MallaInd::visualizarDE_VBOs_NT( ContextoVis & cv ) {
 void MallaInd::PolygonMode ( ContextoVis & cv ) {
   GLenum mode;
   switch(cv.modoVis) {
-    case modoSolido:
-    case modoExamen:
-    case modoSombreadoPlano:
-    case modoSombreadoSuave:
-    case modoMateriales:
-      mode = GL_FILL;
+    case modoAlambre:
+      mode = GL_LINE;
       break;
     case modoPuntos:
       mode = GL_POINT;
       break;
     default:
-      mode = GL_LINE;
+      mode = GL_FILL;
   }
   glPolygonMode( GL_FRONT_AND_BACK, mode);
 }

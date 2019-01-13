@@ -101,3 +101,5 @@ Objeto3D::~Objeto3D()
 
 // -----------------------------------------------------------------------------
 void Objeto3D::fijarColorNodo(const Tupla3f& color) { }
+
+void Objeto3D::asignarIdentificadores( int &nuevo_ident ) { }

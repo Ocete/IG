@@ -73,6 +73,9 @@ class Objeto3D
          const Matriz4f & mmodelado, Objeto3D ** objeto, Tupla3f & centro_wc )  ;
 
       virtual void fijarColorNodo(const Tupla3f& color);
+
+      virtual void asignarIdentificadores( int &nuevo_ident );
+
 } ;
 
 

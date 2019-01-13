@@ -49,13 +49,17 @@ class MallaInd : public Objeto3D
       // visualizar en modo inmediato con 'glDrawArrays'
       void visualizarDE_MI_DrawArrays( ContextoVis & cv );
       // visualizar en modo inmediato con 'glDrawElements'
-      void visualizarDE_MI_DrawElements( ContextoVis & cv );
+      void visualizarDE_MI_ColoresNormales( ContextoVis & cv );
       // visualizar en modo inmediato con sombreado plano
       void visualizarDE_MI_SombreadoPlano( ContextoVis & cv );
       // visualizar en modo inmediato con sombreado suave (Gouroud)
       void visualizarDE_MI_SombreadoSuave( ContextoVis & cv );
       // visualizar en modo inmediato con sombreado suave (Gouroud)
       void visualizarDE_MI_Texturas( ContextoVis & cv );
+      // visualizar en modo inmediato con 'glDrawElements'
+      void visualizarDE_MI_Raw_DrawElements( ContextoVis & cv );
+
+
 
       // visualizar en modo inmediato para el Examen
       void visualizarDE_MI_DrawExamen( ContextoVis & cv );

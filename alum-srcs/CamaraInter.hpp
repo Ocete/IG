@@ -49,6 +49,8 @@ class CamaraInteractiva : public Camara
           hfov_grad, // para cámaras perspectiva: angulo de apertura horizontal
           dx,dy ;    // desplazamientos 'subpixel' para antialiasing (0 por inicialmente)
 
+  // Añadido por mi - representa | f - n |
+  float amplitud;
 
   // constructor de cámaras interactivas, los parámetros son:
   //
