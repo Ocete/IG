@@ -16,6 +16,7 @@ Objeto3D::Objeto3D()
    ponerIdentificador( 0 );
    ponerNombre("objeto anónimo");
    ponerCentroOC( Tupla3f( 0.0, 0.0, 0.0 ) );
+   centro_calculado = false;
 }
 
 // -----------------------------------------------------------------------------

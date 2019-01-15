@@ -456,6 +456,16 @@ void MallaInd::fijarColorNodo(const Tupla3f &color) {
   }
 }
 
+// -----------------------------------------------------------------------------
+
+void MallaInd::calcularCentro() {
+  if ( !centro_calculado ) {
+    Tupla3f centro = centroCajaEnglobante (vertices);
+    ponerCentroOC( centro );
+    centro_calculado = true;
+  }
+}
+
 // *****************************************************************************
 
 // *****************************************************************************
@@ -490,3 +500,25 @@ Tetraedro::Tetraedro(float lado) : MallaInd( "malla tetraedro") {
   asignarColores();
 }
 // *****************************************************************************
+
+// Calcula el centro de la caja que engloba a todos los puntos del vector
+Tupla3f centroCajaEnglobante( std::vector<Tupla3f> &puntos) {
+  std::cout << "entrando" << std::endl;
+  assert ( puntos.size() > 0);
+
+  Tupla3f minimo = puntos[0], maximo = puntos[0];
+
+  for (int i=1; i<puntos.size(); i++) {
+    for (int j=0; j<3; j++) {
+      if ( minimo[j] > puntos[i][j] ) {
+        minimo[j] = puntos[i][j];
+      }
+      if ( maximo[j] < puntos[i][j] ) {
+        maximo[j] = puntos[i][j];
+      }
+    }
+  }
+  Tupla3f p_medio = minimo + maximo;
+  std::cout << "saliendo" << std::endl;
+  return (float) 0.5 * p_medio;
+}

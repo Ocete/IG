@@ -64,7 +64,6 @@ class NodoGrafoEscena : public Objeto3D {
 protected:
      std::vector<EntradaNGE> entradas ;
      bool color_fijado;
-     bool centro_calculado;
 public:
 
    NodoGrafoEscena() ;

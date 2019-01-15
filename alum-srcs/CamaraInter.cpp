@@ -94,18 +94,17 @@ void CamaraInteractiva::calcularMarcoCamara() {
   //    (2) ejes mcv = ejes mcv * matriz
   //    (3) recalcular matrices marco camara
 
-  // Creo que la segunda rotacion deberia ser alrededor del eje Z
   Matriz4f mat = MAT_Traslacion( aten )
                 * MAT_Rotacion( longi, 0, 1, 0)
                 * MAT_Rotacion( -lati, 1, 0, 0)
                 * MAT_Traslacion ( 0, 0, dist);
+
 
   /*Matriz4f mat = MAT_Traslacion ( 0, 0, dist)
                 * MAT_Rotacion( -lati, 1, 0, 0)
                 * MAT_Rotacion( longi, 0, 1, 0)
                 * MAT_Traslacion( aten );
 */
-
   Matriz4f mEjes = MAT_Ident();
   mEjes = mat * mEjes;
 

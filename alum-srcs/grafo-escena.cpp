@@ -131,7 +131,6 @@ void NodoGrafoEscena::asignarIdentificadores( int &nuevo_ident ) {
 // -----------------------------------------------------------------------------
 NodoGrafoEscena::NodoGrafoEscena() {
   color_fijado = false;
-  centro_calculado = false;
 }
 // -----------------------------------------------------------------------------
 void NodoGrafoEscena::fijarColorNodo( const Tupla3f & nuevo_color ) {
@@ -189,15 +188,23 @@ void NodoGrafoEscena::calcularCentroOC() {
   // (si el centro ya ha sido calculado, no volver a hacerlo)
 
   if ( !centro_calculado ) {
-    Tupla3f centro = {0,0,0};
+    Matriz4f mat = MAT_Ident();
+    vector<Tupla3f> centros;
+    Tupla3f centro_leido;
+
     float n_centros = 0;
     for (int i=0; i<entradas.size(); i++) {
         if (entradas[i].tipo == TipoEntNGE::objeto) {
-          n_centros++;
-          centro = centro + entradas[i].objeto->leerCentroOC();
+          entradas[i].objeto->calcularCentroOC();
+          centro_leido = entradas[i].objeto->leerCentroOC();
+          centro_leido = mat * centro_leido;
+          centros.push_back ( centro_leido );
+        } else if ( entradas[i].tipo == TipoEntNGE::transformacion ) {
+          mat = mat * (*entradas[i].matriz);
         }
     }
-    centro = 1 / n_centros * centro;
+
+    Tupla3f centro = centroCajaEnglobante ( centros );
     ponerCentroOC( centro );
     centro_calculado = true;
   }

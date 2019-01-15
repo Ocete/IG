@@ -66,6 +66,7 @@ void P5_FijarMVPOpenGL( int vp_ancho, int vp_alto ) {
   viewport.alto = vp_alto;
   camaras[camara_activa]->ratio_yx_vp = vp_ancho * (1.0) / vp_alto;
 
+  camaras[camara_activa]->calcularViewfrustum();
   camaras[camara_activa]->activar();
 }
 

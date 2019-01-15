@@ -2,6 +2,8 @@
 
 Este repositorio recoge mis prácticas de IG. Actualmente trabajando en la práctica 4 (sin terminar)
 
+## En proceso
+
 Trabajo de las prácticas anteriores:
   - P123: Añadir materiales
 
@@ -16,10 +18,10 @@ Trabajo de la P5:
   - Bug: repasar los calculos del modo ortografico
   - Bug: la seleccion no coge el objeto esperado, obtiene un identificador del color normal.
 
-Como abordar la practica 5:
+## Como abordar la practica 5:
 
 La practica 5 tiene dos bloques importantes: las cámaras y la selección.
-El funcionamiento de la camara esta explicado en el principio del tema 3, las primeras 50 diapos.
+El funcionamiento de la cámara esta explicado en el principio del tema 3, las primeras 50 diapos.
 Como configurar la cámara para nuestra practica esta explicado en el tema 4.
 El funcionamiento del modo selección está explicado en el tema 4.
 
