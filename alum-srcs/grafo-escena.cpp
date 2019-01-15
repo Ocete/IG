@@ -92,10 +92,10 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv ) {
     // Para la practica 5, fijamos el color actual como el identificador
     // CUIDADO: no activar las entradas de tipo material en el bucle de
     // abajo si modoSeleccion esta activado
+    int ident = leerIdentificador();
     if ( cv.modoSeleccionFBO ) {
-      int ident = leerIdentificador();
       //cout << "Color fijado a " << ident << endl;
-      if ( ident != -1 ) {
+      if ( ident > 0 ) {
         FijarColorIdent ( ident );
       }
     }
@@ -103,6 +103,12 @@ void NodoGrafoEscena::visualizarGL( ContextoVis & cv ) {
     if( entradas[i].tipo == TipoEntNGE::objeto ) {
       // si la entrada es sub-objeto, visualizarlo
       entradas[i].objeto->visualizarGL( cv ) ;
+
+      // Esto deberia estar aqui ?
+      if ( ident > 0 ) {
+        FijarColorIdent ( ident );
+      }
+
     } else if ( entradas[i].tipo == TipoEntNGE::transformacion ) {
       // si la entrada es transformación, componerla
       glMatrixMode( GL_MODELVIEW );
@@ -562,6 +568,10 @@ Tronco::Tronco(std::vector<Parametro> *v) {
                 [=](float ang) {return MAT_Rotacion (ang,0,0,1);},
                 true, 0, 45, 0.1) );
 
+  entradas[1].objeto->ponerIdentificador( 100 );
+  entradas[3].objeto->ponerIdentificador( 1000 );
+  entradas[4].objeto->ponerIdentificador( 10000 );
+
   // cout << "Constructor Tronco termina" << endl;
 }
 
@@ -569,6 +579,7 @@ Tronco::Tronco(std::vector<Parametro> *v) {
 
 C2::C2() {
   // cout << "Constructor C2 comienza" << endl;
+
   agregar( new Tronco( &parametros ) );
   nombre = "Tronco";
   // cout << "Constructor C2 termina" << endl;

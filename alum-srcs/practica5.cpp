@@ -43,7 +43,7 @@ void P5_Inicializar(  int vp_ancho, int vp_alto ) {
 
   c2 = new C2();
   int ident = 1;
-  c2->asignarIdentificadores( ident );
+  //c2->asignarIdentificadores( ident );
 
   viewport = Viewport (0, 0, vp_ancho, vp_alto);
 
@@ -52,7 +52,6 @@ void P5_Inicializar(  int vp_ancho, int vp_alto ) {
                                       {0,0,0}, false, 135, 2);
   camaras[1] = new CamaraInteractiva (false, vp_ancho * (1.0) / vp_alto, 0, 0,
                                       {0,0,0}, true, 90, 2);
-
   cout << "hecho." << endl << flush ;
 }
 
@@ -75,6 +74,9 @@ void P5_FijarMVPOpenGL( int vp_ancho, int vp_alto ) {
 void P5_DibujarObjetos( ContextoVis & cv ) {
   // COMPLETAR: práctica 5: activar las fuentes de luz y visualizar la escena
   //      (se supone que la camara actual ya está activada)
+
+  // Esto obviamente no tiene que estar, es solo para pruebas
+  //cv.modoSeleccionFBO = true;
 
   if (c2 != nullptr) {
     //glDisable( GL_LIGHTING );
@@ -113,7 +115,7 @@ bool P5_FGE_PulsarTeclaCaracter(  unsigned char tecla ) {
 
     case '-':
       cout << "Desplaza negativo de la cámara en Z" << endl;
-      camaras[camara_activa]->desplaZ( -1*desp );
+      camaras[camara_activa]->desplaZ( -desp );
       break;
 
     case '+':
@@ -136,7 +138,7 @@ bool P5_FGE_PulsarTeclaEspecial(  int tecla  ) {
   switch ( tecla ) {
     case GLFW_KEY_LEFT:
       cout << "Desplaza hacia la izquierda la cámara" << endl;
-      camaras[camara_activa]->moverHV( -1*desp, 0 );
+      camaras[camara_activa]->moverHV( -desp, 0 );
       break;
 
     case GLFW_KEY_RIGHT:
@@ -151,7 +153,7 @@ bool P5_FGE_PulsarTeclaEspecial(  int tecla  ) {
 
     case GLFW_KEY_DOWN:
       cout << "Desplaza hacia abajo la cámara" << endl;
-      camaras[camara_activa]->moverHV( 0, -1*desp );
+      camaras[camara_activa]->moverHV( 0, -desp );
       break;
 
     default:
@@ -193,7 +195,7 @@ void P5_ClickIzquierdo( int x, int y ) {
     return;
   }
 
-  cout << "Objeto fijado con identificador: " << ident_leido << endl;
+  cout << "Objeto fijado con identificador: " << ident_leido << " y centro " << centro << endl;
   camaras[camara_activa]->modoExaminar( centro );
 }
 

@@ -16,7 +16,8 @@ Trabajo de la P5:
   - Quitar el modoSeleccion
   - Bug: en modo orbital desplaZ no hace nada.
   - Bug: repasar los calculos del modo ortografico
-  - Bug: la seleccion no coge el objeto esperado, obtiene un identificador del color normal.
+  - Bug: la seleccion coge al objeto esperado y el centro del mismo (que creo que esta bien), pero no se centra en dicho punto
+  - Bajar y subir en el arbol actualizando identificadores al pintarlo en modoSeleccionFBO (ahora mismo funciona poniendo de nuevo el identificador al subir en el arbol, peor no se si esta bien asi).
 
 ## Como abordar la practica 5:
 
