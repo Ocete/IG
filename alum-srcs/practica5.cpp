@@ -173,9 +173,11 @@ void P5_ClickIzquierdo( int x, int y ) {
   ContextoVis contexto;
   contexto.modoVis = modoSolido;
   contexto.modoSeleccionFBO = true;
-  glColor3ub(0,0,0);
+  // glColor3ub(0,0,0);
 
   // 2. visualizar en modo selección (sobre el backbuffer)
+  glClearColor(0, 0, 0, 1);                           // color de fondo
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpiar pantalla
   c2->visualizarGL( contexto );
 
   // 3. leer el color del pixel, si es 0 no se hace nada
@@ -187,16 +189,17 @@ void P5_ClickIzquierdo( int x, int y ) {
 
   // 4. buscar el objeto en el grafo de escena e informar del mismo
   Objeto3D ** p_obj;
-  Tupla3f centro;
-  if ( !c2->buscarObjeto( ident_leido, camaras[camara_activa]->mcv.matrizVista,
-          p_obj, centro ) ) {
+  Tupla3f centro (0.0, 0.0, 0.0);
+  Matriz4f mat = MAT_Ident();
+  if ( !c2->buscarObjeto( ident_leido, mat, p_obj, centro ) ) {
     cout << "ERROR: Objeto no encontrado en el arbol. ";
     cout << "Identificador: " << ident_leido << endl;
     return;
   }
 
   cout << "Objeto fijado con identificador: " << ident_leido << " y centro " << centro << endl;
-  camaras[camara_activa]->modoExaminar( centro );
+  // camaras[camara_activa]->modoExaminar( centro );
+  cout << "Objeto fijadisimo " << endl;
 }
 
 // ---------------------------------------------------------------------

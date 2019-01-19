@@ -50,15 +50,8 @@ void CamaraInteractiva::calcularViewfrustum( ) {
 
   if ( perspectiva ) {
     // caso perspectiva: usar hfov_grad, n, ratio_yx_vp, dist, función MAT_Frustum
-
-    //vf.persp = true;
     // diapo 43 de 248, tema 3
-
-    vf = ViewFrustum (hfov_grad, ratio_yx_vp, 0.1, dist + 20 );
-    //vf.matrizProy = MAT_Perspectiva ( hfov_grad, ratio_yx_vp, dist, dist + amplitud );
-    //gluPerspective ( hfov_grad, ratio_yx_vp, dist, dist + amplitud );
-
-
+    vf = ViewFrustum (hfov_grad, ratio_yx_vp, 0.1, dist + 1000 );
   } else {
     // caso ortográfica: usar ratio_yx_vp, dist, función MAT_Ortografica
     vf.persp = false;
@@ -66,21 +59,21 @@ void CamaraInteractiva::calcularViewfrustum( ) {
     assert( epsilon < hfov_grad );
     float hfov_rad = (hfov_grad*M_PI)/180.0 ;
 
-    vf.near = 0.1;
-    vf.far = 120;
-
-    vf.top    = vf.near*tan( 0.5*hfov_rad ) ;
-    vf.bottom = -vf.top ;
-    vf.right  = vf.top*ratio_yx_vp  ;
-    vf.left   = -vf.right ;
+    vf.near = 0.01;
+    vf.far = dist + 1000;
+    vf.top    = dist ;
+    vf.bottom = -dist ;
+    vf.right  = dist*ratio_yx_vp ;
+    vf.left   = -dist*ratio_yx_vp ;
 
     vf.matrizProy = MAT_Ortografica( vf.left, vf.right, vf.bottom,
                                       vf.top, vf.near, vf.far );
   }
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glMultMatrixf( vf.matrizProy );
+  // Esto hace falta?
+  //glMatrixMode(GL_PROJECTION);
+  //glLoadIdentity();
+  //glMultMatrixf( vf.matrizProy );
 }
 
 //-----------------------------------------------------------------------
@@ -99,36 +92,11 @@ void CamaraInteractiva::calcularMarcoCamara() {
                 * MAT_Rotacion( -lati, 1, 0, 0)
                 * MAT_Traslacion ( 0, 0, dist);
 
-  /*Matriz4f mat = MAT_Traslacion ( 0, 0, dist)
-                * MAT_Rotacion( -lati, 1, 0, 0)
-                * MAT_Rotacion( longi, 0, 1, 0)
-                * MAT_Traslacion( aten );
-                */
+  mcv.eje[0] = mat * Tupla4f(1, 0, 0, 0);
+  mcv.eje[1] = mat * Tupla4f(0, 1, 0, 0);
+  mcv.eje[2] = mat * Tupla4f(0, 0, 1, 0);
+  mcv.org    = mat * Tupla4f(0, 0, 0, 1);
 
-  Matriz4f mEjes = MAT_Ident();
-  mEjes = mat * mEjes;
-
-  for (int i=0; i<3; i++) {
-    for (int j=0; j<4; j++) {
-      mcv.eje[i][j] = mEjes(i,j);
-    }
-  }
-
-  for (int i=0; i<3; i++) {
-    mcv.org[i] = mEjes(3,i);
-  }
-/*
-  Matriz4f mEjes = MAT_Filas(mcv.eje);
-  mEjes(3, 3) = 1.0;
-  Matriz4f ejesCambiados = mEjes * mat;
-  for (unsigned i = 0; i < 3; ++i)
-  for (unsigned j = 0; j < 3; ++j)
-    mcv.eje[i](j) = ejesCambiados(i, j);
-/*
-  for (int i=0; i<3; i++) {
-    mcv.eje[i] = mat * mcv.eje[i];
-  }
-*/
   recalcularMatrMCV();
 }
 
@@ -143,9 +111,10 @@ void CamaraInteractiva::recalcularMatrMCV() {
   mcv.matrizVista = MAT_Vista( mcv.eje, mcv.org ) ;
   mcv.matrizVistaInv = MAT_Vista_inv( mcv.eje, mcv.org );
 
-  glMatrixMode ( GL_MODELVIEW );
-  glLoadIdentity();
-  glMultMatrixf ( mcv.matrizVista ) ;
+  // Esto hace falta?
+  //glMatrixMode ( GL_MODELVIEW );
+  //glLoadIdentity();
+  //glMultMatrixf ( mcv.matrizVista ) ;
 }
 
 
@@ -221,7 +190,6 @@ void CamaraInteractiva::desplaZ( float nz ) {
     aten[2] += nz*udesp;
 
     recalcularMatrMCV();
-
   }
 }
 
