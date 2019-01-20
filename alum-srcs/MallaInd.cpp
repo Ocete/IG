@@ -264,6 +264,10 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       glDisable( GL_LIGHTING );
       //glDisable( GL_TEXTURE_2D );
       visualizarDE_MI_DrawExamen(cv);
+
+      // COMPLETAR EN EL EXAMEN SI HACE FALTA
+      // cambiar el main para que se pueda acceder a este modo
+
       break;
     case modoSombreadoPlano:
       glEnable( GL_LIGHTING );
@@ -274,12 +278,6 @@ void MallaInd::visualizarDE_MI( ContextoVis & cv ) {
       glEnable( GL_LIGHTING );
       //glEnable( GL_TEXTURE_2D );
       visualizarDE_MI_SombreadoSuave(cv);
-      break;
-    case modoSeleccion:
-      //glDisable ( GL_TEXTURE_2D );
-      glDisable ( GL_LIGHTING );
-      glColor3ub(0,0,0);
-      visualizarDE_MI_Raw_DrawElements(cv);
       break;
     default:
       glDisable( GL_LIGHTING );
@@ -503,7 +501,6 @@ Tetraedro::Tetraedro(float lado) : MallaInd( "malla tetraedro") {
 
 // Calcula el centro de la caja que engloba a todos los puntos del vector
 Tupla3f centroCajaEnglobante( std::vector<Tupla3f> &puntos) {
-  std::cout << "entrando" << std::endl;
   assert ( puntos.size() > 0);
 
   Tupla3f minimo = puntos[0], maximo = puntos[0];
@@ -519,6 +516,5 @@ Tupla3f centroCajaEnglobante( std::vector<Tupla3f> &puntos) {
     }
   }
   Tupla3f p_medio = minimo + maximo;
-  std::cout << "saliendo" << std::endl;
   return (float) 0.5 * p_medio;
 }

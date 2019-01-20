@@ -286,23 +286,17 @@ void Material::activar(  ) {
     tex->activar();
   } else {
     glDisable( GL_TEXTURE_2D );
-    //glColor4fv(color);
   }
 
   if ( iluminacion ) {
-     //cout << "Activando material: " << nombre() << endl;
-     //cout << del.ambiente << del.difusa << endl;
-     //cout << del.especular << del.exp_brillo << endl;
-     //cout << tra.ambiente << tra.difusa << endl;
-     //cout << tra.especular << tra.exp_brillo << endl;
 
-    //glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
+    glMaterialfv( GL_FRONT, GL_EMISSION, del.emision ) ;
     glMaterialfv( GL_FRONT, GL_AMBIENT, del.ambiente ) ;
     glMaterialfv( GL_FRONT, GL_DIFFUSE, del.difusa ) ;
     glMaterialfv( GL_FRONT, GL_SPECULAR, del.especular ) ;
     glMaterialf( GL_FRONT, GL_SHININESS, del.exp_brillo ) ;
 
-    //glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
+    glMaterialfv( GL_BACK, GL_EMISSION, tra.emision ) ;
     glMaterialfv( GL_BACK, GL_AMBIENT, tra.ambiente ) ;
     glMaterialfv( GL_BACK, GL_DIFFUSE, tra.difusa ) ;
     glMaterialfv( GL_BACK, GL_SPECULAR, tra.especular ) ;
@@ -324,21 +318,21 @@ void Material::activar(  ) {
 //----------------------------------------------------------------------
 
 MaterialLata::MaterialLata()
-    : Material (new Textura("../imgs/lata-coke.jpg"),0.2,2,2.5,5) {
+    : Material (new Textura("../imgs/lata-coke.jpg"),  0.2, 0.4, 0.4, 1.0) {
   ponerNombre( "MaterialLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialTapasLata::MaterialTapasLata()
-    : Material( Tupla3f{0.5,0.5,0.5}, 0.2, 2, 2.5, 5) {
+    : Material( Tupla3f{0.5,0.5,0.5}, 0.2, 0.4, 0.4, 5) {
   ponerNombre( "MaterialTapasLata" );
 }
 
 //----------------------------------------------------------------------
 
 MaterialPeonMadera::MaterialPeonMadera()
-    : Material (new Textura("../imgs/text-madera.jpg"),0,0.7,1,5) {
+    : Material (new Textura("../imgs/text-madera.jpg"), 0.0, 0.7, 0.3, 5) {
   ponerNombre( "MaterialMadera" );
   //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
   //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
@@ -347,7 +341,7 @@ MaterialPeonMadera::MaterialPeonMadera()
 //----------------------------------------------------------------------
 
 MaterialPeonBlanco::MaterialPeonBlanco()
-    : Material( Tupla3f{1,1,1}, 0, 1, 0, 0) {
+    : Material( Tupla3f{1,1,1}, 0.01, 0.99, 0.0, 5.0) {
   ponerNombre( "MaterialBlanco" );
   //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
   //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
@@ -356,7 +350,7 @@ MaterialPeonBlanco::MaterialPeonBlanco()
 //----------------------------------------------------------------------
 
 MaterialPeonNegro::MaterialPeonNegro()
-    : Material( Tupla3f{0.2,0.2,0.2}, 0, 0, 2, 5) {
+    : Material( Tupla3f{0.2,0.2,0.2}, 0.0, 0.01, 0.99, 5) {
   ponerNombre( "MaterialNegro" );
   //del.emision = Tupla4f{0.0,0.0,0.0,1.0};
   //tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
@@ -487,12 +481,13 @@ bool FuenteDireccional::gestionarEventoTeclaEspecial( int key ) {
 //----------------------------------------------------------------------
 
 void FuenteDireccional::variarAngulo( unsigned angulo, float incr ) {
+  if (angulo == 0) {
+    longi += incr;
+  } else {
+    lati = incr > 0 ? min( lati+incr, 90.0f) :
+                      max( lati+incr, -90.0f );
+  }
   if (incr != 0) {
-    if (angulo == 0) {
-      lati = incr > 0 ? min( lati+incr, 90.0f) : max( lati+incr, -90.0f );
-    } else if (angulo == 1) {
-      longi += incr;
-    }
     ActualizarDireccion();
   }
 }
@@ -554,6 +549,9 @@ void ColFuentesLuz::insertar( FuenteLuz * pf ) {
 
 // activa una colección de fuentes de luz
 void ColFuentesLuz::activar( unsigned id_prog ) {
+
+  //glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+  glEnable(GL_NORMALIZE);
 
   glEnable(GL_LIGHTING);
   for (int i=0; i<vpf.size(); i++) {

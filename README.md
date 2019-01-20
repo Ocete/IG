@@ -1,23 +1,19 @@
 # IG
 
-Este repositorio recoge mis prácticas de IG. Actualmente trabajando en la práctica 4 (sin terminar)
+Este repositorio recoge mis prácticas de IG. Actualmente trabajando en la práctica 5 (sin terminar)
 
 ## En proceso
 
 Trabajo de las prácticas anteriores:
   - P123: Añadir materiales
 
-Trabajo de la P4:
-  - modoMateriales no se ve bien (ahora mismo no existe este modo)
-  - Bug: hay un ángulo de la cámara que aunque se mueva no afecta
-  - Bug: en la primera vez que cambio a modoSombreadoPlano
+Trabajo de la P4: Todo hecho
+  - Coordenadas de textura por revolucion
 
 Trabajo de la P5:
-  - Quitar el modoSeleccion
-  - Bug: en modo orbital desplaZ no hace nada.
-  - Bug: repasar los calculos del modo ortografico
   - Bug: la seleccion coge al objeto esperado y el centro del mismo (que creo que esta bien), pero no se centra en dicho punto
-  - Bajar y subir en el arbol actualizando identificadores al pintarlo en modoSeleccionFBO (ahora mismo funciona poniendo de nuevo el identificador al subir en el arbol, peor no se si esta bien asi).
+  - Bajar y subir en el arbol actualizando identificadores al pintarlo en modoSeleccionFBO (ahora mismo funciona poniendo de nuevo el identificador al subir en el arbol, peor no se si esta bien asi). Esto deberia estar bien, pero comentarlo de todas formas
+  - Repasar si tengo que poner el aspect con 1.0/ratio o no al crear el VF en modo perspectiva
 
 ## Como abordar la practica 5:
 

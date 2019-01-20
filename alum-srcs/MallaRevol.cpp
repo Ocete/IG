@@ -71,7 +71,7 @@ void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
   }
 
   // Crear el último perfil de caras
-  if (cerrar_malla) {
+  /*if (cerrar_malla) {
     for (int j=0; j<nvp; j++) {
       if (j+1<nvp) {
         int per = nper-1;
@@ -79,7 +79,7 @@ void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
         caras.push_back(Tupla3i{ per*nvp+j+1, j, j+1 });
       }
     }
-  }
+  }*/
 
   // Crear las tapas (superior e inferior)
   if (crear_tapas) {

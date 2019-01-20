@@ -301,7 +301,7 @@ void FGE_PulsarTeclaCaracter( GLFWwindow* window, unsigned int codepoint )
         }
         break ;
       case 'M' :
-         contextoVis.modoVis = ModosVis((int(contextoVis.modoVis)+1) % (numModosVis-2)) ;
+         contextoVis.modoVis = ModosVis((int(contextoVis.modoVis)+1) % (numModosVis-2)) ; // Poner -1 para activar modo examen
          cout << "modo de visualización cambiado a: '" << nombreModo[contextoVis.modoVis] << "'" << endl << flush ;
          break ;
 
@@ -645,7 +645,7 @@ void Inicializa_OpenGL( )
    glEnable( GL_DEPTH_TEST );
 
    // habilitar filtro de triangulos por su orientación:
-   //glEnable( GL_CULL_FACE );
+   glEnable( GL_CULL_FACE );
 
    // establecer color de fondo: (1,1,1) (blanco)
    glClearColor( 1.0, 1.0, 1.0, 1.0 ) ;

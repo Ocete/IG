@@ -601,6 +601,13 @@ C4::C4() {
   agregar( MAT_Escalado(4,4,4) );
   agregar( MAT_Traslacion(0,-0.5,0) );
   agregar( new Lata() );
+
+
+  entradas[0].objeto->ponerIdentificador( 1 );
+  entradas[2].objeto->ponerIdentificador( 2 );
+  entradas[4].objeto->ponerIdentificador( 3 );
+  entradas[7].objeto->ponerIdentificador( 4 );
+
 }
 
 // -----------------------------------------------------------------------------
@@ -635,9 +642,10 @@ PeonP4::PeonP4(int tipo) {
 // -----------------------------------------------------------------------------
 
 Lata::Lata () {
-  agregar( new TapaSuperiorLata() );
-  agregar( new TapaInferiorLata() );
   agregar( new CuerpoLata() );
+  agregar( new TapaInferiorLata() );
+  agregar( MAT_Traslacion(0,0.025,0) );
+  agregar( new TapaSuperiorLata() );
 }
 
 // -----------------------------------------------------------------------------
@@ -658,5 +666,5 @@ TapaInferiorLata::TapaInferiorLata () {
 
 CuerpoLata::CuerpoLata () {
   agregar( new MaterialLata() );
-  agregar( new MallaRevol("../plys/lata-pcue.ply", 30, 1, 0, 1) );
+  agregar( new MallaRevol("../plys/lata-pcue.ply", 30, 0, 0, 1) );
 }

@@ -33,7 +33,7 @@ static int camara_activa;
 const static float desp = 1;
 
 float xant, yant;
-static C2 * c2;
+static C4 * c4;
 
 // ---------------------------------------------------------------------
 
@@ -41,9 +41,9 @@ void P5_Inicializar(  int vp_ancho, int vp_alto ) {
   cout << "Creando objetos de la práctica 5 .... " << flush ;
   // COMPLETAR: práctica 5: inicializar las variables de la práctica 5 (incluyendo el viewport)
 
-  c2 = new C2();
+  c4 = new C4();
   int ident = 1;
-  //c2->asignarIdentificadores( ident );
+  //c4->asignarIdentificadores( ident );
 
   viewport = Viewport (0, 0, vp_ancho, vp_alto);
 
@@ -78,9 +78,9 @@ void P5_DibujarObjetos( ContextoVis & cv ) {
   // Esto obviamente no tiene que estar, es solo para pruebas
   //cv.modoSeleccionFBO = true;
 
-  if (c2 != nullptr) {
+  if (c4 != nullptr) {
     //glDisable( GL_LIGHTING );
-    c2->visualizarGL( cv );
+    c4->visualizarGL( cv );
     /*if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
       colFuentes->activar( 0 );
     }*/
@@ -178,7 +178,7 @@ void P5_ClickIzquierdo( int x, int y ) {
   // 2. visualizar en modo selección (sobre el backbuffer)
   glClearColor(0, 0, 0, 1);                           // color de fondo
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // limpiar pantalla
-  c2->visualizarGL( contexto );
+  c4->visualizarGL( contexto );
 
   // 3. leer el color del pixel, si es 0 no se hace nada
   int ident_leido = LeerIdentEnPixel(x, y);
@@ -191,7 +191,7 @@ void P5_ClickIzquierdo( int x, int y ) {
   Objeto3D ** p_obj;
   Tupla3f centro (0.0, 0.0, 0.0);
   Matriz4f mat = MAT_Ident();
-  if ( !c2->buscarObjeto( ident_leido, mat, p_obj, centro ) ) {
+  if ( !c4->buscarObjeto( ident_leido, mat, p_obj, centro ) ) {
     cout << "ERROR: Objeto no encontrado en el arbol. ";
     cout << "Identificador: " << ident_leido << endl;
     return;
