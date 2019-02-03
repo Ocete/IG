@@ -318,7 +318,7 @@ void Material::activar(  ) {
 //----------------------------------------------------------------------
 
 MaterialLata::MaterialLata()
-    : Material (new Textura("../imgs/lata-coke.jpg"),  0.2, 0.4, 0.4, 1.0) {
+    : Material (new Textura("../imgs/lata-pepsi.jpg"),  0.2, 0.4, 0.4, 1.0) {
   ponerNombre( "MaterialLata" );
 }
 
@@ -334,8 +334,6 @@ MaterialTapasLata::MaterialTapasLata()
 MaterialPeonMadera::MaterialPeonMadera()
     : Material (new Textura("../imgs/text-madera.jpg"), 0.0, 0.7, 0.3, 5) {
   ponerNombre( "MaterialMadera" );
-  //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
-  //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
 }
 
 //----------------------------------------------------------------------
@@ -343,8 +341,6 @@ MaterialPeonMadera::MaterialPeonMadera()
 MaterialPeonBlanco::MaterialPeonBlanco()
     : Material( Tupla3f{1,1,1}, 0.01, 0.99, 0.0, 5.0) {
   ponerNombre( "MaterialBlanco" );
-  //del.emision = Tupla4f{0.5,0.5,0.5,1.0};
-  //tra.emision = Tupla4f{0.5,0.5,0.5,1.0};
 }
 
 //----------------------------------------------------------------------
@@ -352,8 +348,13 @@ MaterialPeonBlanco::MaterialPeonBlanco()
 MaterialPeonNegro::MaterialPeonNegro()
     : Material( Tupla3f{0.2,0.2,0.2}, 0.0, 0.01, 0.99, 5) {
   ponerNombre( "MaterialNegro" );
-  //del.emision = Tupla4f{0.0,0.0,0.0,1.0};
-  //tra.emision = Tupla4f{0.0,0.0,0.0,1.0};
+}
+
+//----------------------------------------------------------------------
+
+MaterialDado::MaterialDado()
+    : Material (new Textura("../imgs/textura-dado-nr.jpg"),  0.4, 0.6, 0, 1.0) {
+  ponerNombre( "MaterialDado" );
 }
 
 //**********************************************************************
@@ -547,10 +548,23 @@ void ColFuentesLuz::insertar( FuenteLuz * pf ) {
 
 //----------------------------------------------------------------------
 
+// Inserta una fuente de luz nueva
+void ColFuentesLuz::activarUnaFuente( int ident, bool activar ) {
+  if ( ident >= 0 && ident < vpf.size() ) {
+    if ( activar) {
+      vpf[ident]->activar();
+    } else {
+      glDisable ( GL_LIGHT0 + ident );
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 // activa una colección de fuentes de luz
 void ColFuentesLuz::activar( unsigned id_prog ) {
 
-  //glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
   glEnable(GL_NORMALIZE);
 
   glEnable(GL_LIGHTING);

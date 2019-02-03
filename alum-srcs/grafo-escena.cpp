@@ -134,6 +134,7 @@ void NodoGrafoEscena::asignarIdentificadores( int &nuevo_ident ) {
     }
   }
 }
+
 // -----------------------------------------------------------------------------
 NodoGrafoEscena::NodoGrafoEscena() {
   color_fijado = false;
@@ -196,15 +197,12 @@ void NodoGrafoEscena::calcularCentroOC() {
   if ( !centro_calculado ) {
     Matriz4f mat = MAT_Ident();
     vector<Tupla3f> centros;
-    Tupla3f centro_leido;
 
     float n_centros = 0;
     for (int i=0; i<entradas.size(); i++) {
         if (entradas[i].tipo == TipoEntNGE::objeto) {
           entradas[i].objeto->calcularCentroOC();
-          centro_leido = entradas[i].objeto->leerCentroOC();
-          centro_leido = mat * centro_leido;
-          centros.push_back ( centro_leido );
+          centros.push_back ( mat * entradas[i].objeto->leerCentroOC() );
         } else if ( entradas[i].tipo == TipoEntNGE::transformacion ) {
           mat = mat * (*entradas[i].matriz);
         }
@@ -229,21 +227,28 @@ bool NodoGrafoEscena::buscarObjeto
   // COMPLETADO: práctica 5: buscar un sub-objeto con un identificador
   assert(0<ident_busc);
 
-  if ( !centro_calculado ) {
+  if ( leerIdentificador() > 0 && !centro_calculado ) {
     calcularCentroOC();
   }
 
+  Matriz4f mat = mmodelado;
+
   if ( leerIdentificador() == ident_busc ) {
     centro_wc = mmodelado*leerCentroOC();
-    if ( objeto != nullptr ) {
-      *objeto = this ;
+    if ( objeto == nullptr ) {
+      cout << "\t ERROR - Identificador encontrado con puntero asociado nulo" << endl;
     }
+    *objeto = this ;
     return true;
   } else {
     bool found = false;
     for (int i=0; i<entradas.size() && !found; i++) {
-      found = entradas[i].tipo == TipoEntNGE::objeto && entradas[i].objeto->buscarObjeto(
-            ident_busc, mmodelado, objeto, centro_wc );
+      if ( entradas[i].tipo == TipoEntNGE::objeto) {
+        found =  entradas[i].objeto->buscarObjeto(
+                            ident_busc, mat, objeto, centro_wc );
+      } else if (entradas[i].tipo == TipoEntNGE::transformacion) {
+        mat = mat * (*entradas[i].matriz);
+      }
     }
     return found;
   }
@@ -283,9 +288,11 @@ void NodoGrafoEscenaParam::reset() {
 C::C(bool atraccion) {
   // cout << "Constructor C comienza" << endl;
   if (atraccion) {
+    agregar( new MaterialPeonMadera( ) );
     agregar( new Atraccion( &parametros ) );
     nombre = "Atracción";
   } else {
+    agregar( new MaterialPeonBlanco( ) );
     agregar( new Colgante( &parametros ) );
     reset();
     nombre = "Araña";
@@ -475,9 +482,10 @@ Cuerpo::Cuerpo(vector<Parametro> *v) {
   }
   agregar( MAT_Rotacion(45, 0, 1, 0) );
   agregar( MAT_Escalado(1, 0.3, 1) );
+  agregar( new Esfera(20,50,false,false,1) );
+  agregar( new MaterialPeonBlanco() );
   agregar( new Ojo(15) );
   agregar( new Ojo(-15) );
-  agregar( new Esfera(20,50,false,false,1) );
 
   Tupla3f c = {0,0,0};
   fijarColorNodo( c );
@@ -502,6 +510,7 @@ Colgante::Colgante(vector<Parametro> *v) {
   agregar( MAT_Traslacion(0,-25.8,0) );
   agregar( new Cilindro(10, 30, true, true, 25, 0.01) );
   agregar( MAT_Traslacion(0,-0.3,0) );
+  agregar( new MaterialPeonNegro () );
   agregar( new Cuerpo(v) );
 
   // Parámetro asociado
@@ -580,6 +589,7 @@ Tronco::Tronco(std::vector<Parametro> *v) {
 C2::C2() {
   // cout << "Constructor C2 comienza" << endl;
 
+  agregar( new MaterialPeonMadera() );
   agregar( new Tronco( &parametros ) );
   nombre = "Tronco";
   // cout << "Constructor C2 termina" << endl;
@@ -593,6 +603,7 @@ C::C() { }
 
 C4::C4() {
   ponerNombre( "Clase práctica 4" );
+  agregar( new DadoColocado() );
   agregar( new PeonP4(0) );
   agregar( MAT_Rotacion(-45,0,1,0) );
   agregar( new PeonP4(1) );
@@ -602,11 +613,11 @@ C4::C4() {
   agregar( MAT_Traslacion(0,-0.5,0) );
   agregar( new Lata() );
 
-
-  entradas[0].objeto->ponerIdentificador( 1 );
-  entradas[2].objeto->ponerIdentificador( 2 );
-  entradas[4].objeto->ponerIdentificador( 3 );
-  entradas[7].objeto->ponerIdentificador( 4 );
+  entradas[0].objeto->ponerIdentificador( 5 );
+  entradas[1].objeto->ponerIdentificador( 1 );
+  entradas[3].objeto->ponerIdentificador( 2 );
+  entradas[5].objeto->ponerIdentificador( 3 );
+  entradas[8].objeto->ponerIdentificador( 4 );
 
 }
 
@@ -667,4 +678,12 @@ TapaInferiorLata::TapaInferiorLata () {
 CuerpoLata::CuerpoLata () {
   agregar( new MaterialLata() );
   agregar( new MallaRevol("../plys/lata-pcue.ply", 30, 0, 0, 1) );
+}
+
+// -----------------------------------------------------------------------------
+
+DadoColocado::DadoColocado () {
+  agregar( new MaterialDado() );
+  agregar( MAT_Traslacion (-3,0,0) );
+  agregar( new Dado() );
 }

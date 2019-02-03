@@ -39,4 +39,26 @@ número de parámetros sube a 27.
 
 Para el coloreado de la araña he añadido el método fijarColorNodo a Objeto3D y
 a NodoGrafoEscena. Este asigna un color al objeto y a sus subobjetos de forma
-recursiva, parando cuando algún objeto ya tiene color de antemano.z
+recursiva, parando cuando algún objeto ya tiene color de antemano.
+
+Práctica 4.
+
+Los shaders han sido comentados debido a que son incompatibles (los
+implementados) con la iluminación. Se ha añadido un método a la clase
+ColFuentesLuz para activar una única fuente. La tecla 'H' activa y desactiva una
+luz roja direccional. Se ha añadido un objeto Dado utilizando la textura
+dice.jpg a las escenas de las prácticas 4 y 5.
+
+Por la implementacion del modoSombreadoPlano he asumido que este es incompatile
+con los VBOs. Cuando se intenta pintar de esta forma se imprime un mensaje
+explicandolo.
+
+Práctica 5.
+
+Se han añadido los métodos fijarColorNodo y asignarIdentificadores para utilizar
+herencia posteriormente.
+
+Prácticas anteriores.
+
+Se han añadido algunos de los materiales utilizados en estas prácticas a la
+práctica 3 para un mayor realismo.

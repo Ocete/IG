@@ -310,4 +310,12 @@ public:
   CuerpoLata();
 } ;
 
+//**********************************************************************
+
+class DadoColocado : public NodoGrafoEscena {
+  std::string nombre;
+public:
+  DadoColocado();
+} ;
+
 #endif // GRAFO_ESCENA_HPP

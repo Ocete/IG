@@ -39,6 +39,8 @@ const float PI = 3.141592;
 class CamaraInteractiva : public Camara
 {
   public:
+
+  bool    PPR;
   bool    examinar; // modo: {\bf true} --> examinar, {\bf false} --> primera persona (inicialmente {\bf false})
   bool    perspectiva ; // true --> camara perspectiva, false --> cámara ortográfica
   float   ratio_yx_vp;  // aspect ratio del viewport (alto/ancho)
@@ -83,6 +85,7 @@ class CamaraInteractiva : public Camara
   void modoExaminar();                        // pasa a modo examinar (mantiene p.aten.)
   void modoPrimeraPersona() ;                 // pasa al modo primera persona
 
+  void modoPPR();
 
   // recalcular las matrices del marco de coorda de camara, a partir de:
   // mcv.org, mcv.eje[X/Y/Z]

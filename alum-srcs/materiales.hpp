@@ -212,6 +212,11 @@ public:
   MaterialPeonNegro();
 };
 
+class MaterialDado : public Material {
+public:
+  MaterialDado();
+};
+
 //**********************************************************************
 // Clase FuenteLuz
 // ---------------
@@ -308,6 +313,8 @@ class ColFuentesLuz
    void insertar( FuenteLuz * pf ) ; // inserta una nueva
    void activar( unsigned id_prog ); // activa las fuentes de luz
    FuenteLuz * ptrFuente( unsigned i ); // devuelve ptr a la fuente de luz numero i
+   void activarUnaFuente( int ident, bool activar );
+
 
    private:
    std::vector<FuenteLuz *> vpf ; // vector de punteros a fuentes

@@ -162,7 +162,25 @@ void MallaInd::visualizarDE_MI_ColoresNormales( ContextoVis & cv ) {
 
 void MallaInd::visualizarDE_MI_SombreadoPlano( ContextoVis & cv ) {
   glShadeModel( GL_FLAT );
-  visualizarDE_MI_Texturas(cv);
+  glBegin(GL_TRIANGLES);
+
+    for (int i=0; i<caras.size(); i++) {
+      if ( normales_caras.size() > 0 ) {
+        glNormal3fv( normales_caras[i] );
+      }
+      for (int j=0; j<3; j++) {
+        int k = caras[i](j);
+        if ( coordenadas_textura.size() > 0 ) {
+            glTexCoord2fv( coordenadas_textura[k] );
+        } else if ( normales_vertices.size() > 0 ) {
+          glColor3fv( normales_vertices[k] );
+        }
+        glVertex3fv( vertices[k] );
+      }
+    }
+
+  glEnd();
+
 }
 
 // -----------------------------------------------------------------------------
@@ -175,22 +193,6 @@ void MallaInd::visualizarDE_MI_SombreadoSuave( ContextoVis & cv ) {
 // -----------------------------------------------------------------------------
 
 void MallaInd::visualizarDE_MI_Texturas( ContextoVis & cv ) {
-  int index;
-
-  /*glBegin( GL_TRIANGLES );
-  for ( unsigned i=0; i<caras.size(); i++ ) {
-    for( unsigned j=0 ; j<3 ; j++ ) {
-      index = caras[i](j);
-      if ( coordenadas_textura.size() > 0 ) {
-        glTexCoord2fv( coordenadas_textura[ index ] );
-      }
-      if ( normales_vertices.size() > 0 ) {
-        glNormal3fv( normales_vertices[ index ] );
-      }
-      glVertex3fv( vertices[ index ] );
-    }
-  }
-  glEnd();*/
 
   if (coordenadas_textura.size() > 0) {
     glTexCoordPointer(2, GL_FLOAT, 0, coordenadas_textura.data());
@@ -426,7 +428,10 @@ void MallaInd::visualizarGL( ContextoVis & cv ) {
     if (!vbo_creado) {
       inicializarVBOs();
     }
-    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+    if (cv.modoVis == modoSombreadoPlano) {
+      std::cout << "\t El modoSombreadoPlano es incompatile con VBOs " << std::endl;
+      //visualizarDE_VBOs_NT(cv);
+    } else if ( cv.modoVis == modoSombreadoSuave ) {
       visualizarDE_VBOs_NT(cv);
     } else {
       visualizarDE_VBOs(cv);
@@ -456,7 +461,7 @@ void MallaInd::fijarColorNodo(const Tupla3f &color) {
 
 // -----------------------------------------------------------------------------
 
-void MallaInd::calcularCentro() {
+void MallaInd::calcularCentroExplicito() {
   if ( !centro_calculado ) {
     Tupla3f centro = centroCajaEnglobante (vertices);
     ponerCentroOC( centro );
@@ -481,6 +486,7 @@ Cubo::Cubo(float lado) : MallaInd( "malla cubo" ) {
 
   // Esta llamada tiene que realizarse despues de asignar los vertices
   asignarColores();
+  calcularCentroExplicito();
 }
 // *****************************************************************************
 
@@ -496,6 +502,7 @@ Tetraedro::Tetraedro(float lado) : MallaInd( "malla tetraedro") {
 
   // Esta llamada tiene que realizarse despues de asignar los vertices
   asignarColores();
+  calcularCentroExplicito();
 }
 // *****************************************************************************
 
@@ -505,16 +512,50 @@ Tupla3f centroCajaEnglobante( std::vector<Tupla3f> &puntos) {
 
   Tupla3f minimo = puntos[0], maximo = puntos[0];
 
-  for (int i=1; i<puntos.size(); i++) {
+  for (int i=0; i<puntos.size(); i++) {
     for (int j=0; j<3; j++) {
-      if ( minimo[j] > puntos[i][j] ) {
-        minimo[j] = puntos[i][j];
-      }
-      if ( maximo[j] < puntos[i][j] ) {
-        maximo[j] = puntos[i][j];
-      }
+      minimo[j] = std::min(puntos[i][j], minimo[j]);
+      maximo[j] = std::max(puntos[i][j], maximo[j]);
     }
   }
   Tupla3f p_medio = minimo + maximo;
   return (float) 0.5 * p_medio;
+}
+// *****************************************************************************
+
+Dado::Dado() : MallaInd( "Dado" ) {
+  vertices = { {0,1,1}, {1,1,1}, {0,0,1}, {1,0,1},
+              {1,1,1}, {1,1,0}, {1,0,1}, {1,0,0},
+              {0,1,1}, {0,1,0}, {1,1,1}, {1,1,0},
+              {1,0,1}, {1,0,0}, {0,0,1}, {0,0,0},
+              {0,1,0}, {0,1,1}, {0,0,0}, {0,0,1},
+              {1,1,0}, {0,1,0}, {1,0,0}, {0,0,0} };
+
+  normales_vertices = { {0,0,1}, {0,0,1}, {0,0,1}, {0,0,1},
+                        {1,0,0}, {1,0,0}, {1,0,0}, {1,0,0},
+                        {0,1,0}, {0,1,0}, {0,1,0}, {0,1,0},
+                        {0,-1,0}, {0,-1,0}, {0,-1,0}, {0,-1,0},
+                        {-1,0,0}, {-1,0,0}, {-1,0,0}, {-1,0,0},
+                        {0,0,-1}, {0,0,-1}, {0,0,-1}, {0,0,-1} };
+
+  caras = { {1,0,2}, {3,1,2}, {5,4,6}, {7,5,6},
+            {9,8,10}, {11,9,10}, {13,12,14}, {13,14,15},
+            {17,16,18}, {19,17,18}, {21,20,22}, {23,21,22} };
+
+  // Las normales de caras podrian calcularse como la normale de uno de sus
+  // vertices
+  normales_caras  = { {0,0,1}, {0,0,1}, {1,0,0}, {1,0,0},
+                      {0,1,0}, {0,1,0}, {0,-1,0}, {0,-1,0},
+                      {-1,0,0}, {-1,0,0}, {0,0,-1}, {0,0,-1} };
+
+  float t = 1.0/3, s = 2.0/3;
+  coordenadas_textura = { {0,0}, {0.5,0}, {0,t}, {0.5,t},
+                          {0.5,0}, {1,0}, {0.5,t}, {1,t},
+                          {0,t}, {0.5,t}, {0,s}, {0.5,s},
+                          {0.5,t}, {1,t}, {0.5,s}, {1,s},
+                          {0,s}, {0.5,s}, {0,1}, {0.5,1},
+                          {0.5,s}, {1,s}, {0.5,1}, {1,1} };
+
+  //asignarColores();
+  calcularCentroExplicito();
 }

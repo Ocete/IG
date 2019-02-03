@@ -17,25 +17,31 @@ static C4 * c4;
 static ColFuentesLuz  * colFuentes;
 int angulo_activo;
 
+bool luz_roja = false;
+
+
 // ---------------------------------------------------------------------
 // Función para implementar en la práctica 4 para inicialización.
 // Se llama una vez al inicio, cuando ya se ha creado la ventana e
 // incializado OpenGL.
 
 void P4_Inicializar( ContextoVis & cv ) {
-   cout << "Creando objetos de la práctica 4 .... " << flush ;
+  cout << "Creando objetos de la práctica 4 .... " << flush ;
 
-   c4 = new C4();
+  c4 = new C4();
 
-   colFuentes = new ColFuentesLuz();
-   angulo_activo = 0;
-   colFuentes->activar(0);
-   colFuentes->insertar( new FuenteDireccional(-10, 30, VectorRGB(0.4,0.4,0.4,1) ) );
-   colFuentes->insertar( new FuentePosicional( {2.5,0,10}, {0.4,0.4,0.4,0} ) );
+  colFuentes = new ColFuentesLuz();
+  angulo_activo = 0;
+  colFuentes->insertar( new FuenteDireccional(-10, 30, {0.3,0.3,0.3,1} ) );
+  colFuentes->insertar( new FuentePosicional( {2.5,0,10}, {0.3,0.3,0.3,0} ) );
 
-   //glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
+  colFuentes->insertar( new FuenteDireccional(-45, -45, {1,0,0,1} ) );
 
-   cout << "hecho." << endl << flush ;
+  colFuentes->activar(0);
+
+  //glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE );
+
+  cout << "hecho." << endl << flush ;
 }
 
 // ---------------------------------------------------------------------
@@ -50,10 +56,18 @@ void P4_Inicializar( ContextoVis & cv ) {
 bool P4_FGE_PulsarTeclaCaracter( unsigned char tecla, ContextoVis & cv ) {
    bool res = false  ;
    int key = -1;
+   string str;
 
   switch ( toupper( tecla ) ) {
     case 'G' :
       angulo_activo  = ( angulo_activo + 1 ) % 2;
+      break ;
+
+    case 'H' :
+      luz_roja = !luz_roja;
+      str = luz_roja ? "activada" : "desactivada";
+      cout << "Luz roja " << str << endl;
+      res = true;
       break ;
 
     case '>' :
@@ -84,6 +98,9 @@ void P4_DibujarObjetos( ContextoVis & cv ) {
     if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
       colFuentes->activar( 0 );
     }
+
+    colFuentes->activarUnaFuente( 2, luz_roja );
+
     c4->visualizarGL( cv );
   }
 }

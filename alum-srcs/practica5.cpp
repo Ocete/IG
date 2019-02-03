@@ -10,6 +10,7 @@
 #include "practicas.hpp"
 #include "practica5.hpp"
 #include "grafo-escena.hpp"
+#include "materiales.hpp"
 
 #include "CamaraInter.hpp"
 
@@ -26,9 +27,10 @@ Viewport viewport ;
 static bool modo_arrastrar = false ;
 
 // Añadido por mi
-static const int num_camaras = 2;
-static CamaraInteractiva * camaras[num_camaras] = {nullptr, nullptr}; //, nullptr};
+static const int num_camaras = 4;
+static CamaraInteractiva * camaras[num_camaras] = {nullptr, nullptr, nullptr, nullptr};
 static int camara_activa;
+static ColFuentesLuz  * colFuentes;
 
 const static float desp = 1;
 
@@ -42,16 +44,37 @@ void P5_Inicializar(  int vp_ancho, int vp_alto ) {
   // COMPLETAR: práctica 5: inicializar las variables de la práctica 5 (incluyendo el viewport)
 
   c4 = new C4();
-  int ident = 1;
+  //int ident = 1;
   //c4->asignarIdentificadores( ident );
 
   viewport = Viewport (0, 0, vp_ancho, vp_alto);
 
   camara_activa = 0;
-  camaras[0] = new CamaraInteractiva (false, vp_ancho * (1.0) / vp_alto, 0, 0,
+/*  camaras[0] = new CamaraInteractiva (false, vp_alto * (1.0) / vp_ancho, 0, 0,
                                       {0,0,0}, false, 135, 2);
-  camaras[1] = new CamaraInteractiva (false, vp_ancho * (1.0) / vp_alto, 0, 0,
+  camaras[1] = new CamaraInteractiva (false, vp_alto * (1.0) / vp_ancho, 0, 0,
                                       {0,0,0}, true, 90, 2);
+*/
+
+  float aspect = vp_alto * (1.0) / vp_ancho;
+  // Planta
+  camaras[0] = new CamaraInteractiva (true, aspect, 0, 90,
+                                      {0,0,0}, true, 80.0, 8.0);
+  // Alzado
+  camaras[1] = new CamaraInteractiva (true, aspect, 0, 0,
+                                     {0,0,0}, true, 80.0, 10);
+  // Perfil
+  camaras[2] = new CamaraInteractiva (true, aspect, 90, 0,
+                                     {0,0,0}, true, 80, 10);
+  // Ortográfica
+  camaras[3] = new CamaraInteractiva (true, aspect, 0, 0,
+                                      {0,0,0}, false, 80, 5);
+
+  colFuentes = new ColFuentesLuz();
+  colFuentes->insertar( new FuentePosicional( {2.5,0,10}, {1,1,1,0} ) );
+  //colFuentes->insertar( new FuenteDireccional(-10, 30, {1,1,1,1} ) );
+  colFuentes->activar(0);
+
   cout << "hecho." << endl << flush ;
 }
 
@@ -63,7 +86,7 @@ void P5_FijarMVPOpenGL( int vp_ancho, int vp_alto ) {
 
   viewport.ancho = vp_ancho;
   viewport.alto = vp_alto;
-  camaras[camara_activa]->ratio_yx_vp = vp_ancho * (1.0) / vp_alto;
+  camaras[camara_activa]->ratio_yx_vp = vp_alto * (1.0) / vp_ancho;
 
   camaras[camara_activa]->calcularViewfrustum();
   camaras[camara_activa]->activar();
@@ -79,12 +102,11 @@ void P5_DibujarObjetos( ContextoVis & cv ) {
   //cv.modoSeleccionFBO = true;
 
   if (c4 != nullptr) {
-    //glDisable( GL_LIGHTING );
+    glEnable( GL_LIGHTING );
     c4->visualizarGL( cv );
-    /*if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
+    if (cv.modoVis == modoSombreadoPlano || cv.modoVis == modoSombreadoSuave) {
       colFuentes->activar( 0 );
-    }*/
-    //glDisable( GL_LIGHTING );
+    }
   }
 
 }
@@ -94,11 +116,18 @@ void P5_DibujarObjetos( ContextoVis & cv ) {
 bool P5_FGE_PulsarTeclaCaracter(  unsigned char tecla ) {
 
   bool result = true ;
+  string str;
 
   switch ( toupper( tecla ) ) {
+    case 'R':
+      camaras[camara_activa]->modoPPR();
+      str = camaras[camara_activa]->PPR ? "activado" : "desactivado";
+      cout << "Modo PPR " << str << endl;
+      break ;
+
     case 'C':
       camara_activa = (camara_activa + 1) % num_camaras;
-      cout << "Cárama actual cambiada a: " << camara_activa << endl;
+      cout << "Cámraa actual cambiada a: " << camara_activa << endl;
       camaras[camara_activa]->activar();
       break ;
 
@@ -114,12 +143,12 @@ bool P5_FGE_PulsarTeclaCaracter(  unsigned char tecla ) {
       break ;
 
     case '-':
-      cout << "Desplaza negativo de la cámara en Z" << endl;
+      //cout << "Desplaza negativo de la cámara en Z" << endl;
       camaras[camara_activa]->desplaZ( -desp );
       break;
 
     case '+':
-      cout << "Desplaza positivo de la cámara en Z" << endl;
+      //cout << "Desplaza positivo de la cámara en Z" << endl;
       camaras[camara_activa]->desplaZ( desp );
       break;
 
@@ -137,22 +166,22 @@ bool P5_FGE_PulsarTeclaEspecial(  int tecla  ) {
 
   switch ( tecla ) {
     case GLFW_KEY_LEFT:
-      cout << "Desplaza hacia la izquierda la cámara" << endl;
+      //cout << "Desplaza hacia la izquierda la cámara" << endl;
       camaras[camara_activa]->moverHV( -desp, 0 );
       break;
 
     case GLFW_KEY_RIGHT:
-      cout << "Desplaza hacia la derecha la cámara" << endl;
+      //cout << "Desplaza hacia la derecha la cámara" << endl;
       camaras[camara_activa]->moverHV( desp, 0 );
       break;
 
     case GLFW_KEY_UP:
-      cout << "Desplaza hacia arriba la cámara" << endl;
+      //cout << "Desplaza hacia arriba la cámara" << endl;
       camaras[camara_activa]->moverHV( 0, desp );
       break;
 
     case GLFW_KEY_DOWN:
-      cout << "Desplaza hacia abajo la cámara" << endl;
+      //cout << "Desplaza hacia abajo la cámara" << endl;
       camaras[camara_activa]->moverHV( 0, -desp );
       break;
 
@@ -185,21 +214,22 @@ void P5_ClickIzquierdo( int x, int y ) {
   if ( ident_leido <= 0 ) {
     cout << "Ningun objeto seleccionado" << endl;
     return;
+  } else if ( ident_leido == 5 ) {
+    cout << "bingo! has acertado en el dado" << endl;
   }
 
   // 4. buscar el objeto en el grafo de escena e informar del mismo
-  Objeto3D ** p_obj;
+  Objeto3D * p_obj;
   Tupla3f centro (0.0, 0.0, 0.0);
   Matriz4f mat = MAT_Ident();
-  if ( !c4->buscarObjeto( ident_leido, mat, p_obj, centro ) ) {
+  if ( !c4->buscarObjeto( ident_leido, mat, &p_obj, centro ) ) {
     cout << "ERROR: Objeto no encontrado en el arbol. ";
     cout << "Identificador: " << ident_leido << endl;
     return;
   }
 
+  camaras[camara_activa]->modoExaminar( centro );
   cout << "Objeto fijado con identificador: " << ident_leido << " y centro " << centro << endl;
-  // camaras[camara_activa]->modoExaminar( centro );
-  cout << "Objeto fijadisimo " << endl;
 }
 
 // ---------------------------------------------------------------------

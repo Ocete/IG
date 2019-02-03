@@ -41,10 +41,17 @@ MallaRevol::MallaRevol(const string &nombre_arch, const int nperfiles,
   }
 
   asignarColores();
+  calcularCentroExplicito();
   calcular_normales();
 }
 
 // *****************************************************************************
+
+void rotarPerfil( const Matriz4f &mat, std::vector<Tupla3f> &perfil ) {
+  for (int i=0; i<perfil.size(); i++) {
+    perfil[i] = mat * perfil[i];
+  }
+}
 
 void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
     const int nperfiles, const bool crear_tapas, const bool cerrar_malla ) {
@@ -52,34 +59,37 @@ void MallaRevol::crearMallaRevol ( const std::vector<Tupla3f> & perfil_original,
   assert (nperfiles != 0);
   nper = nperfiles;
   nvp = perfil_original.size();
+  std::vector<Tupla3f> perfil = perfil_original;
 
   caras.clear();
   vertices.clear();
-  float ang = 0, ang_incr = cerrar_malla ? (float) 360/(nperfiles-1) :
-                                            (float) 360/nperfiles;
-  Matriz4f M = MAT_Ident();
-  for (int i=0; i<nper; i++) {
-    for (int j=0; j<nvp; j++) {
-      vertices.push_back ( M*perfil_original[j] );
-      if (/*i+1<nper &&*/ j+1<nvp) {
-        caras.push_back(Tupla3i{ i*nvp+j+1, i*nvp+j, ((i+1)%nper)*nvp+j });
-        caras.push_back(Tupla3i{ i*nvp+j+1, ((i+1)%nper)*nvp+j, ((i+1)%nper)*nvp+j+1 });
-      }
+  float ang =  cerrar_malla ? (float) 360/nper : (float) 360/(nper-1);
+
+  Matriz4f mat = MAT_Rotacion(ang,0,1,0);
+  vertices.insert(vertices.end(), perfil.begin(), perfil.end() );
+
+  for (int i=0; i<nper-1; i++) {
+    rotarPerfil( mat, perfil );
+    vertices.insert(vertices.end(), perfil.begin(), perfil.end() );
+
+    for (int j=0; j<nvp-1; j++) {
+      //if (/*i+1<nper &&*/ j+1<nvp) {
+      //  caras.push_back(Tupla3i{ i*nvp+j+1, i*nvp+j, ((i+1)%nper)*nvp+j });
+      //  caras.push_back(Tupla3i{ i*nvp+j+1, ((i+1)%nper)*nvp+j, ((i+1)%nper)*nvp+j+1 });
+      //}
+      caras.push_back(Tupla3i{ i*nvp+j+1, i*nvp+j, (i+1)*nvp+j });
+      caras.push_back(Tupla3i{ i*nvp+j+1, (i+1)*nvp+j, (i+1)*nvp+j+1 });
     }
-    ang += ang_incr;
-    M = MAT_Rotacion(ang,0,1,0);
   }
 
   // Crear el último perfil de caras
-  /*if (cerrar_malla) {
-    for (int j=0; j<nvp; j++) {
-      if (j+1<nvp) {
-        int per = nper-1;
-        caras.push_back(Tupla3i{ per*nvp+j+1, per*nvp+j, j });
-        caras.push_back(Tupla3i{ per*nvp+j+1, j, j+1 });
-      }
+  if (cerrar_malla) {
+    for (int j=0; j<nvp-1; j++) {
+      int i = nper-1;
+      caras.push_back(Tupla3i{ i*nvp+j+1, i*nvp+j, j });
+      caras.push_back(Tupla3i{ i*nvp+j+1, j, j+1 });
     }
-  }*/
+  }
 
   // Crear las tapas (superior e inferior)
   if (crear_tapas) {
@@ -143,9 +153,11 @@ Cilindro::Cilindro( const int num_verts_per, const int nperfiles,
     perfil_original.push_back( Tupla3f{radio, alt*i/(num_verts_per-1), 0} );
   }
   crearMallaRevol (perfil_original, nperfiles, crear_tapas, cerrar_malla );
+  asignarCoordenadasTextura(perfil_original, nperfiles);
 
   ponerNombre("Cilindro");
   asignarColores();
+  calcularCentroExplicito();
   calcular_normales();
 }
 
@@ -163,8 +175,11 @@ Cono::Cono (const int num_verts_per, const int nperfiles,
   }
   crearMallaRevol (perfil_original, nperfiles, crear_tapas, cerrar_malla );
 
+  asignarCoordenadasTextura(perfil_original, nperfiles);
+
   ponerNombre("Cono");
   asignarColores();
+  calcularCentroExplicito();
   calcular_normales();
 }
 
@@ -185,9 +200,11 @@ Esfera::Esfera (const int num_verts_per, const int nperfiles,
       radio*sqrt(1 - (float) i*i/(num_verts_per*num_verts_per)), 0} );
   }
   crearMallaRevol (perfil_original, nperfiles, false, cerrar_malla );
+  asignarCoordenadasTextura(perfil_original, nperfiles);
 
   ponerNombre("Esfera");
   asignarColores();
+  calcularCentroExplicito();
   calcular_normales();
 }
 
@@ -208,8 +225,10 @@ Toroide::Toroide (const int num_verts_per, const int nperfiles,
   }
 
   crearMallaRevol (perfil_original, nperfiles, false, cerrar_malla );
+  asignarCoordenadasTextura(perfil_original, nperfiles);
 
   ponerNombre("Toroide");
   asignarColores();
+  calcularCentroExplicito();
   calcular_normales();
 }

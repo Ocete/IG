@@ -19,6 +19,8 @@ CamaraInteractiva::CamaraInteractiva( bool examinar_ini, float ratio_yx_vp_ini,
 {
    using namespace std ;
 
+   PPR = false;
+
    examinar    = examinar_ini ;
    longi       = longi_ini_grad ;
    lati        = lati_ini_grad ;
@@ -51,7 +53,7 @@ void CamaraInteractiva::calcularViewfrustum( ) {
   if ( perspectiva ) {
     // caso perspectiva: usar hfov_grad, n, ratio_yx_vp, dist, función MAT_Frustum
     // diapo 43 de 248, tema 3
-    vf = ViewFrustum (hfov_grad, ratio_yx_vp, 0.1, dist + 1000 );
+    vf = ViewFrustum (hfov_grad, 1.0/ratio_yx_vp, 0.01, dist + 1000 );
   } else {
     // caso ortográfica: usar ratio_yx_vp, dist, función MAT_Ortografica
     vf.persp = false;
@@ -63,8 +65,8 @@ void CamaraInteractiva::calcularViewfrustum( ) {
     vf.far = dist + 1000;
     vf.top    = dist ;
     vf.bottom = -dist ;
-    vf.right  = dist*ratio_yx_vp ;
-    vf.left   = -dist*ratio_yx_vp ;
+    vf.right  = dist/ratio_yx_vp ;
+    vf.left   = -dist/ratio_yx_vp ;
 
     vf.matrizProy = MAT_Ortografica( vf.left, vf.right, vf.bottom,
                                       vf.top, vf.near, vf.far );
@@ -110,11 +112,6 @@ void CamaraInteractiva::recalcularMatrMCV() {
   // 'mcv.matriVistaInv' en 'mcv' usando 'mcv.eje[X/Y/Z]' y 'mcv.org'
   mcv.matrizVista = MAT_Vista( mcv.eje, mcv.org ) ;
   mcv.matrizVistaInv = MAT_Vista_inv( mcv.eje, mcv.org );
-
-  // Esto hace falta?
-  //glMatrixMode ( GL_MODELVIEW );
-  //glLoadIdentity();
-  //glMultMatrixf ( mcv.matrizVista ) ;
 }
 
 
@@ -135,6 +132,35 @@ void CamaraInteractiva::moverHV( float nh, float nv ) {
     return ;
   }
 
+  if ( PPR ) {
+    Matriz4f mat =  MAT_Traslacion ( (float) 1*mcv.org ) *
+                    MAT_Rotacion( 2*nh*urot,0,1,0 ) *
+                    MAT_Rotacion( 2*nv*urot,1,0,0) *
+                    MAT_Traslacion ( (float) -1*mcv.org );
+
+    Matriz4f matY =  MAT_Rotacion( 2*nh*urot,0,1,0 ),
+             matX =  MAT_Rotacion( 2*nv*urot,1,0,0);
+
+    //mcv.org = mat * mcv.org;
+    cout << "Antes: " << aten <<  mcv.org[2] << endl;
+
+    aten = mat * aten;
+
+    lati += nv*urot*2;
+    longi += nh*urot*2;
+
+
+    //mcv.eje[0] = mat * mcv.eje[0];
+    //mcv.eje[1] = mat * mcv.eje[1];
+    //mcv.eje[2] = mat * mcv.eje[2];
+
+    cout << "Despues: " << aten << endl;
+    calcularMarcoCamara();
+
+
+    return;
+  }
+
   if ( examinar ) { // examinar
 
     // COMPLETADO: práctica 5: actualizar 'longi' y 'lati'
@@ -152,7 +178,6 @@ void CamaraInteractiva::moverHV( float nh, float nv ) {
     mcv.org[0] += nh*udesp;
     mcv.org[1] += nv*udesp;
 
-    // dudoso:
     aten[0] += nh*udesp;
     aten[1] += nv*udesp;
 
@@ -169,7 +194,7 @@ void CamaraInteractiva::desplaZ( float nz ) {
 
   using namespace std ;
 
-  if ( nz == 0 ) {
+  if ( nz == 0 || PPR ) {
     return ;
   }
 
@@ -225,4 +250,11 @@ void CamaraInteractiva::modoPrimeraPersona() {
   // COMPLETADO: práctica 5: activa modo primera persona
   // (no es necesario recalcular el marco de cámara)
   examinar = false;
+}
+
+// -----------------------------------------------------------------------------
+// activa/desactiva modo PPR
+
+void CamaraInteractiva::modoPPR() {
+  PPR = !PPR;
 }

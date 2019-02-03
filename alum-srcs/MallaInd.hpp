@@ -42,7 +42,7 @@ class MallaInd : public Objeto3D
       // calculo de las normales de esta malla
       void calcular_normales();
       // calcula el centro del objeto
-      void calcularCentro();
+      void calcularCentroExplicito();
 
       // visualizar en modo inmediato
       void visualizarDE_MI( ContextoVis & cv );
@@ -115,5 +115,12 @@ class Tetraedro : public MallaInd
 // Calcula el centro de la caja que engloba a todos los puntos del vector
 Tupla3f centroCajaEnglobante( std::vector<Tupla3f> &puntos);
 
+// ---------------------------------------------------------------------
+
+class Dado : public MallaInd
+{
+   public:
+      Dado ();
+};
 
 #endif

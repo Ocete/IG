@@ -5,15 +5,17 @@ Este repositorio recoge mis prácticas de IG. Actualmente trabajando en la prác
 ## En proceso
 
 Trabajo de las prácticas anteriores:
-  - P123: Añadir materiales
+  - Terminado
 
 Trabajo de la P4: Todo hecho
-  - Coordenadas de textura por revolucion
+  - Terminada
 
 Trabajo de la P5:
-  - Bug: la seleccion coge al objeto esperado y el centro del mismo (que creo que esta bien), pero no se centra en dicho punto
-  - Bajar y subir en el arbol actualizando identificadores al pintarlo en modoSeleccionFBO (ahora mismo funciona poniendo de nuevo el identificador al subir en el arbol, peor no se si esta bien asi). Esto deberia estar bien, pero comentarlo de todas formas
-  - Repasar si tengo que poner el aspect con 1.0/ratio o no al crear el VF en modo perspectiva
+  - Terminada
+
+Archivo txt:
+  - Luz roja activada con 'H' y activar unicamente una luz
+  - Dado con coordenadas de texturas asignadas manualmente
 
 ## Como abordar la practica 5:
 
